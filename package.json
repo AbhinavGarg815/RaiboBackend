@@ -3,8 +3,9 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+  "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "devStart": "nodemon ./src/index.js"
   },
   "repository": {
     "type": "git",
@@ -16,9 +17,22 @@
     "url": "https://github.com/AbhinavGarg815/RaiboBackend/issues"
   },
   "homepage": "https://github.com/AbhinavGarg815/RaiboBackend#readme",
+  "devDependencies": {
+    "@eslint/js": "^9.23.0",
+    "eslint": "^8.57.1",
+    "globals": "^16.0.0",
+    "nodemon": "^3.1.9",
+    "prettier": "^3.5.3",
+    "prettier-eslint": "^16.3.0"
+  },
   "dependencies": {
+    "bcryptjs": "^3.0.2",
+    "body-parser": "^2.2.0",
+    "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^5.1.0",
-    "nodemon": "^3.1.9"
+    "express-validator": "^7.2.1",
+    "mongoose": "^8.13.1",
+    "passport": "^0.7.0"
   }
 }
