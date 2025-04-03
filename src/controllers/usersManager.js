@@ -1,6 +1,7 @@
 import { validationResult } from "express-validator";
 import User from "../models/UserSchema.js";
 import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 
 async function signUp(req, res, next) {
   const error = validationResult(req);
@@ -44,4 +45,51 @@ async function signUp(req, res, next) {
   });
 }
 
-export { addUser, signUp };
+async function login(req, res, next) {
+  const error = validationResult(req);
+  if (!error.isEmpty()) {
+    return res.status(400).json({ error: error.array() });
+  }
+
+  const { email, password } = req.body;
+
+  let user = await User.findOne({ email: email });
+  if (!user) {
+    return res.status(400).json({
+      error: "Email not found.",
+    });
+  }
+
+  bcrypt.compare(password, user.password).then((isMatch) => {
+    if (isMatch) {
+      const key = process.env.JWT_SECRET;
+      // User's password is correct and we need to send the JSON Token for that user
+      const payload = {
+        _id: user._id,
+        username: user.username,
+        name: user.name,
+        email: user.email,
+      };
+      jwt.sign(
+        payload,
+        key,
+        {
+          expiresIn: 604800,
+        },
+        (err, token) => {
+          res.status(200).json({
+            success: true,
+            token: `Bearer ${token}`,
+          });
+        },
+      );
+    } else {
+      return res.status(401).json({
+        error: "Incorrect password.",
+        success: false,
+      });
+    }
+  });
+}
+
+export { signUp, login };
