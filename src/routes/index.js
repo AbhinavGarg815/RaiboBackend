@@ -1,6 +1,7 @@
-import testRoutes from './api/testRoutes.js';
-import apiRoutes from './api/apiRoutes.js';
+import testRoutes from "./api/testRoutes.js";
+import apiRoutes from "./api/authRoutes.js";
 
 export default {
-    testRoutes, apiRoutes
+  testRoutes,
+  apiRoutes,
 };

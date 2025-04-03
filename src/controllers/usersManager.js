@@ -2,6 +2,7 @@ import { validationResult } from "express-validator";
 import User from "../models/UserSchema.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import passport from "passport";
 
 async function signUp(req, res, next) {
   const error = validationResult(req);
@@ -92,4 +93,10 @@ async function login(req, res, next) {
   });
 }
 
-export { signUp, login };
+async function profile(req, res, next) {
+  return res.json({
+    user: req.user,
+  });
+}
+
+export { signUp, login, profile };
