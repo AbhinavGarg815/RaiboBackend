@@ -17,4 +17,16 @@ import authRoutes from './routes/auth.routes.js';
 
 app.use('/api/v1/auth', authRoutes);
 
+import reviewRoutes from './routes/review.routes.js';
+
+app.use('/api/v1/review', reviewRoutes);
+
+import categoryRoutes from './routes/category.routes.js';
+
+app.use('/api/v1/category', categoryRoutes);
+
+import productRoutes from './routes/product.routes.js';
+
+app.use('/api/v1/product', productRoutes);
+
 export default app;

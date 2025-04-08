@@ -31,11 +31,13 @@ const productSchema = new Schema({
         ref: 'Company',
         required: true
     },
-    images: {
-        type: [Schema.Types.ObjectId],
-        ref: 'Image',
-        required: true
-    },
+    images: [
+        {
+            type: Schema.Types.ObjectId,
+            ref: 'Image',
+            required: true
+        }
+    ],
     discount: {
         type: Number,
         default: 0,
