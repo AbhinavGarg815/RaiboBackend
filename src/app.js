@@ -1,6 +1,9 @@
 import express from 'express';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
+import passport from 'passport';
+import { googleLogin } from './config/passport.config.js';
+import authRoutes from './routes/auth.routes.js';
 
 const app = express();
 
@@ -13,7 +16,8 @@ app.use(express.urlencoded({express: true, limit: "16kb"}))
 app.use(cookieParser())
 app.use(express.static('public'))
 
-import authRoutes from './routes/auth.routes.js';
+passport.use(googleLogin)
+
 
 app.use('/api/v1/auth', authRoutes);
 

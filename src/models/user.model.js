@@ -3,6 +3,16 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 
 const userSchema = new Schema({
+    googleId:{
+        type: String,
+        validate: {
+            validator: function (value) {
+              // Google ID is required if email and password are not provided
+              return this.email || this.password || value;
+            },
+            message: "Google ID is required if email and password are not provided.",
+          },
+    },
     fullname: {
         type: String,
         required: true,
@@ -14,19 +24,33 @@ const userSchema = new Schema({
         required: true,
         unique: true,
         trim: true,
-        lowercase: true
+        lowercase: true,
+        validate: {
+            validator: function (value) {
+              // Email is required if Google ID is not provided
+              return this.googleId || value;
+            },
+            message: "Email is required if Google ID is not provided.",
+          },
     },
     password: {
         type: String,
-        required: true,
+
+    validate: {
+      validator: function (value) {
+        // Password is required if Google ID is not provided
+        return this.googleId || value;
+      },
+      message: "Password is required if Google ID is not provided.",
+    },
     },
     phone: {
         type: String,
-        required: true,
+        trim: true,
         unique: true,
-        trim: true
+        sparse: true
     }
-}, 
+},
 {
     timestamps: true,
 })
@@ -42,13 +66,14 @@ userSchema.methods.isPasswordCorrect = async function (password) {
     return await bcrypt.compare(password, this.password)
 }
 
+
+
 userSchema.methods.generateAccessToken = function () {
     return jwt.sign(
         {
             _id: this._id,
             fullname: this.fullname,
             email: this.email,
-            phone: this.phone
         },
         process.env.ACCESS_TOKEN_SECRET,
         {
