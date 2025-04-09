@@ -4,6 +4,7 @@ import cors from 'cors';
 import passport from 'passport';
 import { googleLogin } from './config/passport.config.js';
 import authRoutes from './routes/auth.routes.js';
+import { jwtLogin } from './config/jwtStrategy.js';
 
 const app = express();
 
@@ -16,7 +17,9 @@ app.use(express.urlencoded({express: true, limit: "16kb"}))
 app.use(cookieParser())
 app.use(express.static('public'))
 
-passport.use(googleLogin)
+app.use(passport.initialize());
+passport.use(googleLogin);
+passport.use(jwtLogin);
 
 
 app.use('/api/v1/auth', authRoutes);

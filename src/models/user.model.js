@@ -37,12 +37,12 @@ const userSchema = new Schema({
         type: String,
 
     validate: {
-      validator: function (value) {
-        // Password is required if Google ID is not provided
-        return this.googleId || value;
-      },
-      message: "Password is required if Google ID is not provided.",
-    },
+                validator: function (value) {
+                    // Password is required if Google ID is not provided
+                    return this.googleId || value;
+                },
+                 message: "Password is required if Google ID is not provided.",
+            },
     },
     phone: {
         type: String,
