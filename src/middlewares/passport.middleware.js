@@ -8,8 +8,21 @@ const googleAuthenticator = passport.authenticate("google", {accessType: "offlin
 });
 
 
-const googleCallbackAuthenticator = passport.authenticate("google", {
-  failureRedirect: "/error", session: false,
-});
+const googleCallbackAuthenticator = (req, res, next) => {
+  passport.authenticate("google", { session: false }, (err, user, info) => {
+    if (err) {
+      console.error("Google authentication error:", err.message);
+      return res.status(500).json({ error: "Authentication failed. Please try again." });
+    }
+
+    if (!user) {
+      console.warn("Authentication failed:", info?.message || "Unknown reason");
+      return res.redirect("/error");
+    }
+
+    req.user = user;
+    next();
+  })(req, res, next);
+};
 
 export { jwtAuthenticator, googleAuthenticator, googleCallbackAuthenticator };
