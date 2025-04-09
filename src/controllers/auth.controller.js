@@ -10,6 +10,14 @@ const registerUser = asyncHandler(async (req, res) => {
         return;
     }
     const { fullname, email, password, phone } = req.body;
+
+    if (!fullname || !email || !password || !phone) {
+        res.status(400).json({
+            message: "Please provide all fields"
+        });
+        return;
+    }
+
     const existing = await User.findOne({
         $or: [
             { email },
@@ -35,10 +43,24 @@ const registerUser = asyncHandler(async (req, res) => {
 const loginUser = asyncHandler(async (req, res) => {
     const { email, password } = req.body;
 
+    if (!email || !password) {
+        res.status(400).json({
+            message: "Please provide email and password"
+        });
+        return;
+    }
+
     const user = await User.findOne({ email });
     if (!user) {
         res.status(400).json({
             message: "User not found"
+        });
+        return;
+    }
+
+    if(!user.password) {
+        res.status(400).json({
+            message: "Please login with Google"
         });
         return;
     }
