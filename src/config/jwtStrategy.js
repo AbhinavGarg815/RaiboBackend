@@ -6,7 +6,7 @@ const secretOrKey = process.env.ACCESS_TOKEN_SECRET;
 
 const jwtLogin = new JwtStrategy(
   {
-    jwtFromRequest: ExtractJwt.fromHeader('x-auth-token'),
+    jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
     secretOrKey,
   },
   async (payload, done) => {

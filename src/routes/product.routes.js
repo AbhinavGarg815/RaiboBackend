@@ -1,14 +1,14 @@
 import { Router } from 'express';
 import { createProduct, getAllProducts, getProductById, updateProduct, deleteProduct, getProductsByCategory, getProductsByCompany } from '../controllers/product.controller.js';
-import { authMiddleware } from '../middlewares/auth.middleware.js';
+import { jwtAuthenticator } from '../middlewares/passport.middleware.js';
 
 const router = Router();
 
-router.post('/', authMiddleware, createProduct);
+router.post('/', jwtAuthenticator, createProduct);
 router.get('/', getAllProducts);
 router.get('/:id', getProductById);
-router.put('/:id', authMiddleware, updateProduct);
-router.delete('/:id', authMiddleware, deleteProduct);
+router.put('/:id', jwtAuthenticator, updateProduct);
+router.delete('/:id', jwtAuthenticator, deleteProduct);
 router.get('/category/:category_id', getProductsByCategory);
 router.get('/company/:company_id', getProductsByCompany);
 
