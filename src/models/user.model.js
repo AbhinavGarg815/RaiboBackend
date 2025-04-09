@@ -46,9 +46,7 @@ const userSchema = new Schema({
     },
     phone: {
         type: String,
-        trim: true,
-        unique: true,
-        sparse: true
+        trim: true
     }
 },
 {
@@ -93,5 +91,13 @@ userSchema.methods.generateRefreshToken = function () {
         }
     )
 }
+
+userSchema.index(
+    { phone: 1 },
+    {
+      unique: true,
+      partialFilterExpression: { phone: { $exists: true, $ne: null } },
+    }
+  );
 
 export const User = mongoose.model('User', userSchema);
