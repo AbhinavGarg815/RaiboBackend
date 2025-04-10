@@ -1,6 +1,11 @@
 import mongoose, { Schema } from "mongoose";
 
 const cardDetailsSchema = new Schema({
+    user_id: {
+        type: Schema.Types.ObjectId,
+        ref: 'User',
+        required: true
+    },
     card_number: {
         type: String,
         required: true,
@@ -12,7 +17,7 @@ const cardDetailsSchema = new Schema({
         trim: true,
     },
     expiry_date: {
-        type: String,
+        type: Schema.Types.Date,
         required: true,
         trim: true,
     }
