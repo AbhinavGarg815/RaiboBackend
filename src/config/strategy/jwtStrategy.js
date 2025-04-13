@@ -1,5 +1,5 @@
 import { Strategy as JwtStrategy, ExtractJwt } from 'passport-jwt';
-import {User} from '../models/user.model.js';
+import {User} from '../../models/user.model.js';
 
 
 const secretOrKey = process.env.ACCESS_TOKEN_SECRET;

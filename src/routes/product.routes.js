@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { createProduct, getAllProducts, getProductById, updateProduct, deleteProduct, getProductsByCategory, getProductsByCompany } from '../controllers/product.controller.js';
 import { jwtAuthenticator } from '../middlewares/passport.middleware.js';
-import { productCreateValidator, productDeleteValidator, productGetByCategoryValidator, productGetByCompanyValidator, productGetByIdValidator, productGetValidator, productUpdateValidator } from '../middlewares/product.validator.middleware.js';
+import { productCreateValidator, productDeleteValidator, productGetByCategoryValidator, productGetByCompanyValidator, productGetByIdValidator, productGetValidator, productUpdateValidator } from '../middlewares/validators/product.validator.middleware.js';
 
 const router = Router();
 

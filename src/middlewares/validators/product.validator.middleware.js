@@ -1,5 +1,5 @@
 import {body, param} from "express-validator";
-import {validationHandler} from "../utils/validationHandler.js";
+import {validationHandler} from "../../utils/validationHandler.js";
 
 const productCreateValidator = [
     body('name')

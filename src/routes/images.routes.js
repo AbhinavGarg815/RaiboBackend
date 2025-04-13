@@ -1,5 +1,5 @@
 import express from 'express';
-import { upload , multerErrorHandler } from '../middlewares/multer.middleware.js';
+import { upload , multerErrorHandler } from '../middlewares/validators/multer.middleware.js';
 import { uploadImage, deleteImage, getImageById} from '../controllers/image.controller.js';
 import { getImageByIdValidator, deleteImageByIdValidator} from '../middlewares/validators/image.validator.js';
 

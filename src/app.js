@@ -2,9 +2,9 @@ import express from 'express';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import passport from 'passport';
-import { googleLogin } from './config/passport.config.js';
+import { googleLogin } from './config/strategy/googleStrategy.js';
 import authRoutes from './routes/auth.routes.js';
-import { jwtLogin } from './config/jwtStrategy.js';
+import { jwtLogin } from './config/strategy/jwtStrategy.js';
 
 const app = express();
 

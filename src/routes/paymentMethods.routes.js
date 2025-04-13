@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import {jwtAuthenticator} from '../middlewares/passport.middleware.js';
-import { methodCreateValidator, methodDeleteValidator, methodGetValidator, methodUpdateValidator } from '../middlewares/paymentMethods.validator.middleware.js';
+import { methodCreateValidator, methodDeleteValidator, methodGetValidator, methodUpdateValidator } from '../middlewares/validators/paymentMethods.validator.middleware.js';
 import { createPaymentMethod, getAllPaymentMethods, getPaymentMethodById, deletePaymentMethod, updatePaymentMethod } from '../controllers/paymentMethods.controller.js';
 
 const router = Router();
