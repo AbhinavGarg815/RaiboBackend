@@ -38,6 +38,10 @@ app.use('/api/v1/product', productRoutes);
 import paymentMethodRoutes from './routes/paymentMethods.routes.js';
 app.use('/api/v1/payment-methods', paymentMethodRoutes);
 
+import companyRoutes from './routes/company.routes.js';
+app.use('/api/v1/company', companyRoutes);
+
+
 import imageRoutes from './routes/images.routes.js';
 app.use('/api/v1/image', imageRoutes);
 
