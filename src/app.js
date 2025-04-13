@@ -42,4 +42,8 @@ import imageRoutes from './routes/images.routes.js';
 app.use('/api/v1/image', imageRoutes);
 
 
+import addressRoutes from './routes/address.routes.js';
+app.use('/api/v1/address', addressRoutes);
+
+
 export default app;
