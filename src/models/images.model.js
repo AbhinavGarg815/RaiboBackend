@@ -4,7 +4,6 @@ const imageSchema = new Schema({
     product_id: {
         type: Schema.Types.ObjectId,
         ref: 'Product',
-        required: true
     },
     url: {
         type: String,
@@ -14,9 +13,9 @@ const imageSchema = new Schema({
     embedding: {
         type: [Number],
     }
-}, 
-{ 
-    timestamps: true 
+},
+{
+    timestamps: true
 });
 
 export const Image = mongoose.model("Image", imageSchema);
