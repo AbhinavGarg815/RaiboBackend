@@ -24,14 +24,21 @@
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^5.1.0",
+    "express-validator": "^7.2.1",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.13.1",
     "mongoose-aggregate-paginate-v2": "^1.1.4",
     "multer": "^1.4.5-lts.2",
     "passport": "^0.7.0",
-    "passport-google-oauth20": "^2.0.0"
+    "passport-google-oauth20": "^2.0.0",
+    "passport-jwt": "^4.0.1",
+    "prettier": "^3.5.3",
+    "prettier-eslint": "^16.3.0"
   },
   "devDependencies": {
+    "@eslint/js": "^9.24.0",
+    "eslint": "^9.24.0",
+    "globals": "^16.0.0",
     "nodemon": "^3.1.9"
   }
 }

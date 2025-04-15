@@ -2,9 +2,9 @@ import express from 'express';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import passport from 'passport';
-import { googleLogin } from './config/passport.config.js';
+import { googleLogin } from './config/strategy/googleStrategy.js';
 import authRoutes from './routes/auth.routes.js';
-import { jwtLogin } from './config/jwtStrategy.js';
+import { jwtLogin } from './config/strategy/jwtStrategy.js';
 
 const app = express();
 
@@ -34,5 +34,25 @@ app.use('/api/v1/category', categoryRoutes);
 import productRoutes from './routes/product.routes.js';
 
 app.use('/api/v1/product', productRoutes);
+
+import paymentMethodRoutes from './routes/paymentMethods.routes.js';
+app.use('/api/v1/payment-methods', paymentMethodRoutes);
+
+import companyRoutes from './routes/company.routes.js';
+app.use('/api/v1/company', companyRoutes);
+
+
+import imageRoutes from './routes/images.routes.js';
+app.use('/api/v1/image', imageRoutes);
+
+
+import addressRoutes from './routes/address.routes.js';
+app.use('/api/v1/address', addressRoutes);
+
+import cartRoutes from './routes/cart.routes.js';
+app.use('/api/v1/cart', cartRoutes);
+
+import orderRoutes from './routes/order.routes.js';
+app.use('/api/v1/order', orderRoutes);
 
 export default app;

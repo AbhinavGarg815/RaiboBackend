@@ -1,5 +1,5 @@
 import GoogleStrategy from "passport-google-oauth20";
-import {User} from "../models/user.model.js";
+import {User} from "../../models/user.model.js";
 
 
 

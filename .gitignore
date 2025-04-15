@@ -1,3 +1,7 @@
 node_modules/
 .env
-.vscode
+.vscode/
+
+eslint.config.js
+public/temp/
+

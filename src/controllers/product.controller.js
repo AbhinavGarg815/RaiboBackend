@@ -2,6 +2,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { Product } from "../models/product.model.js";
 import { Company } from "../models/company.model.js";
 import { Category } from "../models/category.model.js";
+import { Image } from "../models/images.model.js";
 
 const createProduct = asyncHandler(async (req, res) => {
     const { name, description, price, quantity, category_id, company_id, images, discount, discount_valid_until } = req.body;
@@ -19,6 +20,9 @@ const createProduct = asyncHandler(async (req, res) => {
         });
         return;
     }
+
+
+
     const product = await Product.create({
         name,
         description,
@@ -30,6 +34,11 @@ const createProduct = asyncHandler(async (req, res) => {
         discount,
         discount_valid_until
     });
+
+    images.forEach(async (image) => {
+        await Image.findByIdAndUpdate(image, { reference_id: product._id } );
+    });
+
     res.status(201).json({
         message: "Product created successfully",
         product,
