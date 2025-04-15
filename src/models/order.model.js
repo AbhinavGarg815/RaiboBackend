@@ -15,11 +15,16 @@ const orderSchema = new Schema({
         type: String,
         enum: ['pending', 'completed', 'cancelled'],
         default: 'pending',
+        required: true,
     },
     payment_method: {
         type: String,
         enum: ['credit_card', 'debit_card', 'cash_on_delivery'],
         required: true,
+    },
+    method_id:{
+        type: mongoose.Schema.ObjectId,
+        ref: 'cardDetails',
     },
     receiver_name: {
         type: String,

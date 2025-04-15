@@ -52,5 +52,7 @@ app.use('/api/v1/address', addressRoutes);
 import cartRoutes from './routes/cart.routes.js';
 app.use('/api/v1/cart', cartRoutes);
 
+import orderRoutes from './routes/order.routes.js';
+app.use('/api/v1/order', orderRoutes);
 
 export default app;
