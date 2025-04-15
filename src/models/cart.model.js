@@ -6,6 +6,15 @@ const cartSchema = new Schema({
         ref: 'Buyer',
         required: true
     },
+
+    status:
+    {
+        type:String,
+        required: true,
+        enum: ['open','closed'],
+        default: 'open'
+    },
+
     products: [
         {
             product_id: {

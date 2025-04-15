@@ -49,5 +49,8 @@ app.use('/api/v1/image', imageRoutes);
 import addressRoutes from './routes/address.routes.js';
 app.use('/api/v1/address', addressRoutes);
 
+import cartRoutes from './routes/cart.routes.js';
+app.use('/api/v1/cart', cartRoutes);
+
 
 export default app;
