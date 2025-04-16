@@ -29,4 +29,12 @@ import productRoutes from './routes/product.routes.js';
 
 app.use('/api/v1/product', productRoutes);
 
+import permissionRoutes from './routes/permission.routes.js';
+
+app.use('/api/v1/permission', permissionRoutes);
+
+import roleRoutes from './routes/role.routes.js';
+
+app.use('/api/v1/role', roleRoutes);
+
 export default app;
