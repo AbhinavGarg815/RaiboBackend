@@ -47,8 +47,14 @@ const userSchema = new Schema({
     phone: {
         type: String,
         trim: true
-    }
-},
+    },
+    role: [
+        {
+            type: Schema.Types.ObjectId,
+            ref: 'Role'
+        }
+    ]
+}, 
 {
     timestamps: true,
 })
