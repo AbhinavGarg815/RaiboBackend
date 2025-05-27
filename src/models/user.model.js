@@ -54,7 +54,7 @@ const userSchema = new Schema({
             ref: 'Role'
         }
     ]
-}, 
+},
 {
     timestamps: true,
 })

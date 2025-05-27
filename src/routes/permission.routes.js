@@ -1,11 +1,11 @@
 import { Router } from "express";
 import { createPermission, getAllPermissions, getPermissionById, updatePermission, deletePermission } from "../controllers/permission.controller.js";
-import { authMiddleware } from "../middlewares/auth.middleware.js";
+import { jwtAuthenticator } from "../middlewares/passport.middleware.js";
 import { authorizePermissionMiddleware } from "../middlewares/authorizePermission.middleware.js";
 
 const router = Router();
 
-router.use(authMiddleware, authorizePermissionMiddleware('admin:all'));
+router.use(jwtAuthenticator, authorizePermissionMiddleware('admin:all'));
 
 router.post("/", createPermission);
 router.get("/", getAllPermissions);

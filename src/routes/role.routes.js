@@ -1,11 +1,11 @@
 import { Router } from "express";
 import { createRole, getAllRoles, getRoleById, updateRole, deleteRole } from "../controllers/role.controller.js";
-import { authMiddleware } from "../middlewares/auth.middleware.js";
+import { jwtAuthenticator } from "../middlewares/passport.middleware.js";
 import { authorizePermissionMiddleware } from "../middlewares/authorizePermission.middleware.js";
 
 const router = Router();
 
-router.use(authMiddleware, authorizePermissionMiddleware('admin:all'));
+router.use(jwtAuthenticator, authorizePermissionMiddleware('admin:all'));
 
 router.post("/", createRole);
 router.get("/", getAllRoles);
