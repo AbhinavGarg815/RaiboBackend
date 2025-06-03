@@ -1,7 +1,8 @@
 import { User } from '../models/user.model.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
+import crypto from 'crypto'
+import nodemailer from 'nodemailer'
 
 const registerUser = asyncHandler(async (req, res) => {
     if (!req.body) {
@@ -31,14 +32,47 @@ const registerUser = asyncHandler(async (req, res) => {
         });
         return;
     }
-    const user = new User({
+
+    const verificationToken = crypto.randomBytes(20).toString('hex');
+    const tempUser = new TempUser({
         fullname,
         email,
         password,
-        phone
+        phone,
+        verificationToken,
+        verificationExpires: Date.now() + 3600000 // 1 hour
     });
-    await user.save();
-    res.status(201).json({ message: "User registered successfully" });
+    await tempUser.save();
+
+    const transporter = nodemailer.createTransport({
+        service: "gmail",
+        host: "smtp.gmail.com",
+        port: 587,
+        secure: false,
+        auth: {
+          user: process.env.GMAIL_USER,
+          pass: process.env.GMAIL_PASS,
+        },
+      });
+
+    const mailOptions = {
+        from: process.env.GMAIL_USER,
+        to: tempUser.email,
+        subject: "Email Verification",
+        text: `Please verify your email by clicking the following link: \n\n ${process.env.CLIENT_URL}/verify-email/${verificationToken} \n\n If you did not request this, please ignore this email.`,
+    };
+
+    transporter.sendMail(mailOptions, (err, info) => {
+        if (err) {
+            console.error("Error sending verification email:", err);
+            res.status(500).json({ message: "Error sending verification email" });
+            return;
+        }
+        console.log("Email sent:", info.response);
+        res.status(200).json({
+            message: "Verification email sent. Please check your inbox."
+        });
+    });    
 })
 
 const loginUser = asyncHandler(async (req, res) => {
@@ -128,4 +162,32 @@ const refreshToken = asyncHandler (async (req, res) => {
     });
 });
 
-export { registerUser, loginUser, logoutUser, refreshToken };
+const verifyEmail = asyncHandler(async (req, res) => {
+    const { token } = req.params;
+
+    const tempUser = await TempUser.findOne({
+        verificationToken: token,
+        verificationExpires: { $gt: Date.now() },
+    });
+
+    if (!tempUser) {
+        return res.status(400).json({ message: "Invalid or expired token" });
+    }
+
+    const user = new User({
+        fullname: tempUser.fullname,
+        email: tempUser.email,
+        password: tempUser.password,
+        phone: tempUser.phone,
+        isVerified: true
+    });
+    await tempUser.remove(); // Remove temporary user after successful verification
+
+    await user.save();
+
+    res.status(200).json({ message: "Email verified successfully" });
+})
+
+
+
+export { registerUser, loginUser, logoutUser, refreshToken, verifyEmail };

@@ -54,6 +54,11 @@ const userSchema = new Schema({
             ref: 'Role'
         }
     ]
+    ,
+    isVerified: {
+        type: Boolean,
+        default: false,
+    }
 },
 {
     timestamps: true,

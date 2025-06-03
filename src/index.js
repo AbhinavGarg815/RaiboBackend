@@ -5,7 +5,11 @@ import {connectCloudinary} from "./config/cloudinary.config.js";
 import app from "./app.js";
 
 dotenv.config({
-    path: './env'
+    path: './.env'
+})
+
+app.get("/", (req, res) => {
+    res.send("Raibo backend");
 })
 
 connectCloudinary();
