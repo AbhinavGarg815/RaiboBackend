@@ -22,7 +22,6 @@ const createProduct = asyncHandler(async (req, res) => {
     }
 
 
-
     const product = await Product.create({
         name,
         description,

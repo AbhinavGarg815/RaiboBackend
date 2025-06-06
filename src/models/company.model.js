@@ -18,6 +18,11 @@ const companySchema = new Schema({
         ref: 'Address',
         required: true,
         trim: true
+    },
+    users: {
+        type: [Schema.Types.ObjectId],
+        ref: 'User',
+        default: []
     }
 })
 
