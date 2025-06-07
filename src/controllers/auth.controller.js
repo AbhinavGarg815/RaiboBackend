@@ -113,7 +113,7 @@ const loginUser = asyncHandler(async (req, res) => {
 
     res.status(200).json({
         message: "Login successful",
-        accessToken,
+        access_token: accessToken,
         user: {
             _id: user._id,
             fullname: user.fullname,
@@ -156,7 +156,7 @@ const refreshToken = asyncHandler (async (req, res) => {
     const newAccessToken = user.generateAccessToken();
 
     return res.status(200).json({
-        accessToken: newAccessToken
+        access_token: newAccessToken
     });
 });
 

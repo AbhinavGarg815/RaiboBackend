@@ -128,11 +128,11 @@ const updateProduct = asyncHandler(async (req, res) => {
 })
 
 const deleteProduct = asyncHandler(async (req, res) => {
-    const { company_id } = req.body;
+    const company_id  = req.params.company_id;
     if (!company_id) {
  throw new ApiError(400, "Company ID is required");
     }
-    const product = await Product.findOneAndDelete({ _id: req.params.id, company_id });
+    const product = await Product.findOneAndDelete({ _id: req.params.id, company_id : req.params.company_id });
     if (!product) {
  throw new ApiError(404, "Product not found for this company");
     }
