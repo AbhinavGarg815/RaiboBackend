@@ -24,7 +24,7 @@ const productSchema = new Schema({
     category_id: {
         type: Schema.Types.ObjectId,
         ref: 'Category',
-        required: true
+        required: false
     },
     company_id: {
         type: Schema.Types.ObjectId,
@@ -35,6 +35,12 @@ const productSchema = new Schema({
         {
             type: Schema.Types.ObjectId,
             ref: 'Image',
+            required: true
+        }
+    ],
+    imageUrls: [
+        {
+            type: String,
             required: true
         }
     ],

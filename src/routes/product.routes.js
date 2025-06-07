@@ -1,16 +1,19 @@
 import { Router } from 'express';
-import { createProduct, getAllProducts, getProductById, updateProduct, deleteProduct, getProductsByCategory, getProductsByCompany } from '../controllers/product.controller.js';
+import { createProduct, getAllProducts, getProductById, updateProduct, deleteProduct, getProductInfoById,getAllProductsBuyer } from '../controllers/product.controller.js';
 import { jwtAuthenticator } from '../middlewares/passport.middleware.js';
-import { productCreateValidator, productDeleteValidator, productGetByCategoryValidator, productGetByCompanyValidator, productGetByIdValidator, productUpdateValidator } from '../middlewares/validators/product.validator.middleware.js';
+import { productCreateValidator, productDeleteValidator, productGetByCategoryValidator, productGetByCompanyValidator, productGetByIdValidator, productUpdateValidator } from '../middlewares/validators/product.validator.middleware.js'; 
+// import { getProductsByCategory, getProductsByCompany } from '../controllers/product.controller.js';
 
+//Removing JWT auth for now
 const router = Router();
+router.post('/seller/:company_id', productCreateValidator, createProduct);
+router.get('/seller/:company_id', getAllProducts);
+router.get('/seller/:company_id/:id', productGetByIdValidator, getProductById);
+router.put('/seller/:company_id/:id', productUpdateValidator, updateProduct);
+router.delete('/seller/:company_id/:id', productDeleteValidator, deleteProduct);
 
-router.post('/', jwtAuthenticator, productCreateValidator, createProduct);
-router.get('/', getAllProducts); // Removed productGetValidator
-router.get('/:id', productGetByIdValidator,getProductById);
-router.put('/:id', jwtAuthenticator,productUpdateValidator, updateProduct);
-router.delete('/:id', jwtAuthenticator, productDeleteValidator,deleteProduct);
-router.get('/category/:category_id', productGetByCategoryValidator,getProductsByCategory);
-router.get('/company/:company_id', productGetByCompanyValidator,getProductsByCompany);
+// Buyer Route
+router.get('/:id', productGetByIdValidator, getProductInfoById);
+router.get('/', getAllProductsBuyer);
 
 export default router;

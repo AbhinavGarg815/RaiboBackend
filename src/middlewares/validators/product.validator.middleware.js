@@ -18,22 +18,22 @@ const productCreateValidator = [
         .isNumeric()
         .notEmpty()
         .isFloat({ min: 0 }),
-    body('category_id')
-        .isMongoId()
-        .notEmpty()
-        .withMessage('Invalid category ID'),
+    // body('category_id')
+    //     .isMongoId()
+    //     .notEmpty()
+    //     .withMessage('Invalid category ID'),
     body('company_id')
         .isMongoId()
         .notEmpty()
         .withMessage('Invalid company ID'),
     body('images')
         .isArray({ min: 1 })
-        .withMessage('At least one image is required')
-        .custom((value, { req }) => {
-            const imageIds = value.map(image => image._id);
-            req.body.images = imageIds;
-            return true;
-        }),
+        .withMessage('At least one image is required'),
+        // .custom((value, { req }) => {
+        //     const imageIds = value.map(image => image._id);
+        //     req.body.images = imageIds;
+        //     return true;
+        // }),
         body("discount")
         .optional()
         .isFloat({ min: 0 })
