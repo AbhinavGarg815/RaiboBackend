@@ -6,9 +6,11 @@ import { jwtAuthenticator } from '../middlewares/passport.middleware.js';
 
 const router = express.Router();
 
-router.post('/upload', jwtAuthenticator,upload.single('image') , multerErrorHandler, uploadImageValidator,uploadImage);
+router.post('/upload',upload.single('image') , multerErrorHandler, uploadImageValidator,uploadImage);
 router.get('/:id', getImageByIdValidator, getImageById);
 router.get('/delete/:id',deleteImageByIdValidator , deleteImage);
+
+// router.post('/multiple', jwtAuthenticator, upload.array('images', 10), multerErrorHandler, uploadMultipleImages); // 'images' is the field name for multiple files
 
 
 export default router;

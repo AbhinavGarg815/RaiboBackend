@@ -1,6 +1,8 @@
 import GoogleStrategy from "passport-google-oauth20";
 import {User} from "../../models/user.model.js";
 
+import dotenv from "dotenv";
+dotenv.config(); // Ensure environment variables are loaded
 
 
 const googleLogin =  new GoogleStrategy(

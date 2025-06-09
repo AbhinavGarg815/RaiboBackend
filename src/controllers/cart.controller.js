@@ -60,6 +60,29 @@ const removeProductFromCart = asyncHandler(async (req, res) => {
     res.status(200).json({ message: "Product removed from cart", cart });
 });
 
+const updateProductQuantityInCart = asyncHandler(async (req, res) => {
+    const buyer_id = req.user._id;
+    const { product_id, quantity } = req.body;
+
+    if (quantity <= 0) {
+        return res.status(400).json({ message: "Quantity must be greater than zero" });
+    }
+
+    const cart = await Cart.findOne({ buyer_id, status: 'open' });
+    if (!cart) {
+        return res.status(404).json({ message: "Cart not found" });
+    }
+
+    const product = cart.products.find(p => p.product_id.toString() === product_id);
+    if (!product) {
+        return res.status(404).json({ message: "Product not found in cart" });
+    }
+
+    product.quantity = quantity;
+    await cart.save();
+
+    res.status(200).json({ message: "Product quantity updated successfully", cart });
+});
 
 const deleteCart = asyncHandler(async (req, res) => {
     const buyer_id = req.user._id;
@@ -72,4 +95,4 @@ const deleteCart = asyncHandler(async (req, res) => {
     res.status(200).json({ message: "Cart deleted successfully" });
 });
 
-export {  getCartByBuyerId, addProductToCart, removeProductFromCart, deleteCart };
+export {  getCartByBuyerId, addProductToCart, removeProductFromCart, deleteCart, updateProductQuantityInCart };

@@ -4,6 +4,7 @@ import {
     addProductToCart,
     removeProductFromCart,
     deleteCart,
+    updateProductQuantityInCart,
 } from "../controllers/cart.controller.js";
 import {
     cartAddProductValidator,
@@ -18,5 +19,5 @@ router.get("/", jwtAuthenticator, getCartByBuyerId);
 router.put("/add", jwtAuthenticator,cartAddProductValidator, addProductToCart);
 router.put("/remove", jwtAuthenticator,cartRemoveProductValidator, removeProductFromCart);
 router.delete("/", jwtAuthenticator, deleteCart);
-
+router.put("/update-quantity", jwtAuthenticator, updateProductQuantityInCart);
 export default router;

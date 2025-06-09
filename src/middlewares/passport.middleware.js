@@ -21,6 +21,7 @@ const googleCallbackAuthenticator = (req, res, next) => {
     }
 
     req.user = user;
+    console.log("User authenticated successfully:", user);
     next();
   })(req, res, next);
 };
