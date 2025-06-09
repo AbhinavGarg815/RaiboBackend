@@ -9,7 +9,19 @@ const getImageByIdValidator = [
 ];
 
 const uploadImageValidator = [
-    body('type').trim().notEmpty().withMessage('Invalid image type'),
+    body().custom((value, { req }) => {
+        if (!req.file) {
+            throw new Error('Image file is required');
+        }
+        const file = req.file;
+        // Accept common image mime types
+
+        const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+        if (!allowedMimeTypes.includes(file.mimetype)) {
+            throw new Error('Invalid image file type');
+        }
+        return true;
+    }),
     validationHandler
 ];
 
