@@ -3,6 +3,7 @@ import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import passport from 'passport';
 import { googleLogin } from './config/strategy/googleStrategy.js';
+import { googleTokenLogin } from './config/strategy/googleTokenStrategy.js';
 import authRoutes from './routes/auth.routes.js';
 import { jwtLogin } from './config/strategy/jwtStrategy.js';
 
@@ -18,7 +19,8 @@ app.use(cookieParser())
 app.use(express.static('public'))
 
 app.use(passport.initialize());
-passport.use(googleLogin);
+passport.use('google',googleLogin);
+passport.use('google-token', googleTokenLogin);
 passport.use(jwtLogin);
 
 app.use('/api/v1/auth', authRoutes);

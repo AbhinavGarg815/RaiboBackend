@@ -13,8 +13,12 @@ const googleLogin =  new GoogleStrategy(
     },
     async (accessToken, refreshToken, profile, done) => {
         try {
-
-            const user = await User.findOne({ googleId: profile.id });
+            const user = await User.findOne({ 
+                $or: [
+                    { googleId: profile.id }, 
+                    { email: profile.emails[0].value }
+                ]
+            });
 
             if (user) {
                 console.log(user);
