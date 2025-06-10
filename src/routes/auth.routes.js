@@ -12,6 +12,7 @@ router.post('/refresh', refreshToken);
 
 router.get('/login/google' , googleAuthenticator);
 router.get('/callback/google', googleCallbackAuthenticator ,loginUserGoogleCallback);
+router.post('/login/google-auth', googleCallbackAuthenticator ,loginUserGoogleCallback);
 
 router.get('/verify-email/:token', verifyEmail);
 
