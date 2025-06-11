@@ -72,16 +72,21 @@ const getAllProductsBuyer = asyncHandler(async (req, res) => {
 })
 
 const getProductById = asyncHandler(async (req, res) => {
-    const product = await Product.findById(req.params.id).populate('category_id').populate('company_id');
+    const user_id = req.user._id; // Assuming user_id is available in the request body or can be retrieved from the session/auth
+    const product = await Product.findById(req.params.id)
+        .populate('category_id')
+        .populate('company_id');
     if (!product) {
         res.status(400).json({
             message: "Product not found",
         });
         return;
     }
+    const isLiked = product.likedBy.includes(user_id);
     res.status(200).json({
         message: "Product fetched successfully",
-        product,
+        product: { ...product.toObject(), isLiked, likedBy: undefined }, // Exclude likedBy array
+
     });
 });
 
@@ -143,7 +148,8 @@ const deleteProduct = asyncHandler(async (req, res) => {
 })
 
 const getProductInfoById = asyncHandler(async (req, res) => {
-    const product = await Product.findById(req.params.id).select("-quantity -archived").populate('category_id').populate('company_id');
+    const user_id = req.user._id;
+    const product = await Product.findById(req.params.id).select("-quantity -archived").populate('category_id').populate('company_id')
     if (!product || product.archived) {
         throw new ApiError(404, "Product not found");
     }
@@ -153,6 +159,34 @@ const getProductInfoById = asyncHandler(async (req, res) => {
     });
 });
 
+const handleLike = asyncHandler(async (req, res) => {
+    const { product_id } = req.body;
+    const user_id = req.user._id;
+    if (!product_id) {
+        throw new ApiError(400, "Product ID and User ID are required");
+    }
+
+    const product = await Product.findById(product_id);
+
+    if (!product) {
+        throw new ApiError(404, "Product not found");
+    }
+
+    const likedIndex = product.likedBy.indexOf(user_id);
+    const message = likedIndex === -1 ? "Product liked successfully" : "Product unliked successfully";
+    if (likedIndex === -1) {
+        product.likedBy.push(user_id);
+        product.likesCount++;
+    } else {
+        product.likedBy.splice(likedIndex, 1);
+        product.likesCount--;
+    }
+
+    await product.save();
+
+    res.status(200).json({ success: true, message: message, likesCount: product.likesCount });
+});
+
 export {
     createProduct,
     getAllProducts,
@@ -160,5 +194,6 @@ export {
     updateProduct,
     deleteProduct,
     getProductInfoById,
-    getAllProductsBuyer
+    getAllProductsBuyer,
+    handleLike
 };

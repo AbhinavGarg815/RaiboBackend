@@ -64,6 +64,14 @@ const productSchema = new Schema({
         default: 0,
         min: 0
     },
+    likesCount: {
+        type: Number,
+        default: 0,
+    },
+    likedBy: [{
+        type: Schema.Types.ObjectId,
+        ref: 'User',
+    }]
 })
 
 export const Product = mongoose.model("Product", productSchema)
