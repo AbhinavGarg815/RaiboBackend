@@ -2,7 +2,8 @@ import { User } from '../models/user.model.js';
 import { enqueJob } from '../utils/job.handler.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
+import nodemailer from 'nodemailer';
 
 const registerUser = asyncHandler(async (req, res) => {
     if (!req.body) {
@@ -11,11 +12,26 @@ const registerUser = asyncHandler(async (req, res) => {
         });
         return;
     }
-    const { fullname, email, password, phone } = req.body;
 
-    if (!fullname || !email || !password || !phone) {
+    const { fullname, email, password, phone, role, companyId } = req.body;
+
+    if (!email || !password || !role) {
         res.status(400).json({
-            message: "Please provide all fields"
+            message: "Please provide email, password, and role"
+        });
+        return;
+    }
+
+    if (role === 'buyer' && (!fullname || !phone)) {
+        res.status(400).json({
+            message: "Buyers must provide fullname and phone"
+        });
+        return;
+    }
+
+    if (role === 'seller' && !companyId) {
+        res.status(400).json({
+            message: "Sellers must provide a company ID"
         });
         return;
     }
@@ -32,15 +48,20 @@ const registerUser = asyncHandler(async (req, res) => {
         });
         return;
     }
-    const user = new User({
+
+    const verificationToken = crypto.randomBytes(20).toString('hex');
+    const newUser = new User({
         fullname,
         email,
         password,
-        phone
+        phone: role === 'buyer' ? phone : undefined,
+        role,
+        ...(role === 'seller' && { companyId: companyId ? new mongoose.Types.ObjectId(companyId) : undefined }),
+        verificationToken,
     });
-    await user.save();
-    res.status(201).json({ message: "User registered successfully" });
-})
+    await newUser.save();
+    res.status(200).json({ message: "User registered successfully. Verification email will be sent later." });
+});
 
 const loginUser = asyncHandler(async (req, res) => {
     const { email, password } = req.body;
@@ -60,7 +81,14 @@ const loginUser = asyncHandler(async (req, res) => {
         return;
     }
 
-    if(!user.password) {
+    if (!user.isVerified) {
+        res.status(400).json({
+            message: "Please verify your email."
+        });
+        return;
+    }
+
+    if (!user.password) {
         res.status(400).json({
             message: "Please login with Google"
         });
@@ -74,6 +102,7 @@ const loginUser = asyncHandler(async (req, res) => {
         });
         return;
     }
+
     const accessToken = user.generateAccessToken();
     const refreshToken = user.generateRefreshToken();
     res.cookie('refreshToken', refreshToken, {
@@ -81,18 +110,21 @@ const loginUser = asyncHandler(async (req, res) => {
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',
         maxAge: 1000 * 60 * 60 * 24 * 10
-    })
+    });
+
     res.status(200).json({
         message: "Login successful",
-        accessToken,
+        access_token: accessToken,
         user: {
             _id: user._id,
             fullname: user.fullname,
             email: user.email,
-            phone: user.phone
+            phone: user.phone,
+            role: user.role,
+            ...(user.role.includes('seller') && { companyId: user.companyId }),
         }
     });
-})
+});
 
 const logoutUser = asyncHandler(async (req, res) => {
     res.clearCookie('refreshToken', {
@@ -125,7 +157,7 @@ const refreshToken = asyncHandler (async (req, res) => {
     const newAccessToken = user.generateAccessToken();
 
     return res.status(200).json({
-        accessToken: newAccessToken
+        access_token: newAccessToken
     });
 });
 

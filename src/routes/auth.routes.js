@@ -13,6 +13,9 @@ router.post('/refresh', refreshToken);
 
 router.get('/login/google' , googleAuthenticator);
 router.get('/callback/google', googleCallbackAuthenticator ,loginUserGoogleCallback);
+router.post('/login/google-auth', googleCallbackAuthenticator ,loginUserGoogleCallback);
+
+router.get('/verify-email/:token', verifyEmail);
 
 router.post('/verify/:verificationToken', verifyUser);
 router.post('/request-verify/:id', requestVerify);
