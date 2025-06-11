@@ -20,7 +20,10 @@ const loginUserGoogleCallback = asyncHandler( async (req, res) => {
             _id: user._id,
             fullname: user.fullname,
             email: user.email,
-            phone: user.phone
+            phone: user.phone,
+            role: user.role,
+            ...(user.role.includes('seller') && { companyId: user.companyId }),
+            points: user.points
         }
     });
 })
