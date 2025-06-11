@@ -13,7 +13,7 @@ router.put('/seller/:company_id/:id',jwtAuthenticator, productUpdateValidator, u
 router.delete('/seller/:company_id/:id',jwtAuthenticator, productDeleteValidator, deleteProduct);
 
 // Buyer Route
-router.get('/:id',jwtAuthenticator, productGetByIdValidator, getProductInfoById);
+router.get('/:id',jwtAuthenticator, productGetByIdValidator, getProductById);
 router.get('/',jwtAuthenticator, getAllProductsBuyer);
 //Like Route
 router.post('/like',jwtAuthenticator, handleLike);

@@ -4,6 +4,8 @@ import { Company } from "../models/company.model.js";
 import { Category } from "../models/category.model.js";
 import { Image } from "../models/images.model.js";
 import { ApiError } from "../utils/ApiError.js";
+import { Comment } from "../models/comment.model.js";
+import { User } from "../models/user.model.js";
 
 const createProduct = asyncHandler(async (req, res) => {
     const { name, description, price, quantity, category_id, company_id, images = [], discount, discount_valid_until } = req.body;
@@ -82,13 +84,27 @@ const getProductById = asyncHandler(async (req, res) => {
         });
         return;
     }
-    const isLiked = product.likedBy.includes(user_id);
+
+    // Fetch external comments for the product
+    const comments = await Comment.find({ reference: product._id, onModel: 'Product', type: 'external', isDeleted: false })
+        .select('_id content parentComment');
+
+    // Determine if the user has liked the product
+    const isLikedByUser = product.likedBy.includes(user_id);
+
     res.status(200).json({
         message: "Product fetched successfully",
-        product: { ...product.toObject(), isLiked, likedBy: undefined }, // Exclude likedBy array
-
+        product: {
+            ...product.toObject(),
+            isLikedByUser,
+            likesCount: product.likesCount,
+            comments: comments, // Include comments in the response
+            likedBy: undefined // Exclude likedBy array
+        },
     });
 });
+
+
 
 const updateProduct = asyncHandler(async (req, res) => { 
     const { company_id } = req.body;
@@ -144,7 +160,7 @@ const deleteProduct = asyncHandler(async (req, res) => {
     res.status(200).json({
  message: "Product deleted successfully",
  product,
-    });
+ });
 })
 
 const getProductInfoById = asyncHandler(async (req, res) => {

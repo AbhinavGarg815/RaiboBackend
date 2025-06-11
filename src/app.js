@@ -45,6 +45,10 @@ import roleRoutes from './routes/role.routes.js';
 
 app.use('/api/v1/role', roleRoutes);
 
+import commentRoutes from './routes/comment.routes.js';
+
+app.use('/api/v1/comment', commentRoutes);
+
 import paymentMethodRoutes from './routes/paymentMethods.routes.js';
 app.use('/api/v1/payment-methods', paymentMethodRoutes);
 
