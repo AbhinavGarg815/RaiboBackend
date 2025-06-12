@@ -19,7 +19,7 @@ const createProduct = asyncHandler(async (req, res) => {
 
     if (!company) {
         res.status(400).json({
-            message: "Company not found", 
+            message: "Company not found",
         });
         return;
     }
@@ -38,12 +38,9 @@ const createProduct = asyncHandler(async (req, res) => {
         company_id,
         imageUrls: images,
         discount,
-        discount_valid_until
-    }); 
-
-    // images.forEach(async (image) => {
-    //     await Image.findByIdAndUpdate(image, { reference_id: product._id } );
-    // }); 
+        discount_valid_until,
+        status: 'pending' // Set initial status to pending
+    });
 
     res.status(201).json({
         message: "Product created successfully", product,
@@ -65,11 +62,20 @@ const getAllProducts = asyncHandler(async (req, res) => {
 
 const getAllProductsBuyer = asyncHandler(async (req, res) => {
 
-    const products = await Product.find().populate('category_id').populate('company_id');
+    const user_id = req.user?._id; // Get user ID if authenticated
+    const products = await Product.find({ status: 'approved' }).populate('category_id').populate('company_id'); // Only fetch approved products
+
+    const productsWithLikeStatus = await Promise.all(products.map(async (product) => {
+        const isLikedByUser = user_id ? product.likedBy.includes(user_id) : false;
+        const comments = await Comment.find({ reference: product._id, onModel: 'Product', type: 'external', isDeleted: false })
+            .select('_id content parentComment');
+        const { likedBy, ...productWithoutLikedBy } = product.toObject();
+        return { ...productWithoutLikedBy, isLikedByUser, comments: comments };
+    }));
 
     res.status(200).json({
         message: "Products fetched successfully",
-        products,
+        products: productsWithLikeStatus,
     });
 })
 
@@ -106,10 +112,10 @@ const getProductById = asyncHandler(async (req, res) => {
 
 
 
-const updateProduct = asyncHandler(async (req, res) => { 
+const updateProduct = asyncHandler(async (req, res) => {
     const { company_id } = req.body;
     if (!company_id) {
- throw new ApiError(400, "Company ID is required");
+        throw new ApiError(400, "Company ID is required");
     }
     const updateFields = {};
     const fields = ['name', 'description', 'price', 'quantity', 'category_id', 'company_id', 'imageUrls', 'discount', 'discount_valid_until'];
@@ -118,8 +124,8 @@ const updateProduct = asyncHandler(async (req, res) => {
             updateFields[field] = req.body[field];
         }
     })
-    if ("company_id" in updateFields) { 
-        const company = await Company.findById(updateFields.company_id); 
+    if ("company_id" in updateFields) {
+        const company = await Company.findById(updateFields.company_id);
         if (!company) {
             res.status(400).json({
                 message: "Company not found",
@@ -135,11 +141,11 @@ const updateProduct = asyncHandler(async (req, res) => {
             });
             return;
         }
-    } 
+    }
     const updateProduct = await Product.findByIdAndUpdate(
         { _id: req.params.id, company_id }, updateFields,
         { new: true }
-    ) 
+    )
     if (!updateProduct) {
         throw new ApiError(404, "Product not found");
     }
@@ -149,18 +155,18 @@ const updateProduct = asyncHandler(async (req, res) => {
 })
 
 const deleteProduct = asyncHandler(async (req, res) => {
-    const company_id  = req.params.company_id;
+    const company_id = req.params.company_id;
     if (!company_id) {
- throw new ApiError(400, "Company ID is required");
+        throw new ApiError(400, "Company ID is required");
     }
-    const product = await Product.findOneAndDelete({ _id: req.params.id, company_id : req.params.company_id });
+    const product = await Product.findOneAndDelete({ _id: req.params.id, company_id: req.params.company_id });
     if (!product) {
- throw new ApiError(404, "Product not found for this company");
+        throw new ApiError(404, "Product not found for this company");
     }
     res.status(200).json({
- message: "Product deleted successfully",
- product,
- });
+        message: "Product deleted successfully",
+        product,
+    });
 })
 
 const getProductInfoById = asyncHandler(async (req, res) => {
@@ -171,6 +177,60 @@ const getProductInfoById = asyncHandler(async (req, res) => {
     }
     res.status(200).json({
         message: "Product fetched successfully",
+        product,
+    });
+});
+
+const getPendingProducts = asyncHandler(async (req, res) => {
+    // Assuming only admin can access this route, you might add an admin middleware here
+    const pendingProducts = await Product.find({ status: 'pending' })
+        .populate('category_id')
+        .populate('company_id');
+
+    res.status(200).json({
+        message: "Pending products fetched successfully",
+        products: pendingProducts,
+    });
+});
+
+const approveProduct = asyncHandler(async (req, res) => {
+    // Assuming only admin can access this route
+    const { productId } = req.params;
+
+    const product = await Product.findById(productId);
+
+    if (!product) {
+        throw new ApiError(404, "Product not found");
+    }
+
+    if (product.status === 'approved') {
+        throw new ApiError(400, "Product is already approved");
+    }
+
+    product.status = 'approved';
+    await product.save();
+
+    res.status(200).json({
+        message: "Product approved successfully",
+        product,
+    });
+});
+
+const rejectProduct = asyncHandler(async (req, res) => {
+    // Assuming only admin can access this route
+    const { productId } = req.params;
+
+    const product = await Product.findById(productId);
+
+    if (!product) {
+        throw new ApiError(404, "Product not found");
+    }
+
+    product.status = 'rejected';
+    await product.save();
+
+    res.status(200).json({
+        message: "Product rejected successfully",
         product,
     });
 });
@@ -211,5 +271,8 @@ export {
     deleteProduct,
     getProductInfoById,
     getAllProductsBuyer,
-    handleLike
+    handleLike,
+    getPendingProducts,
+    approveProduct,
+    rejectProduct
 };
