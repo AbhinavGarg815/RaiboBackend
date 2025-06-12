@@ -1,6 +1,11 @@
 import mongoose, { Schema } from "mongoose";
 
 const orderSchema = new Schema({
+    user_id: {
+        type: Schema.Types.ObjectId,
+        ref: 'Buyer',
+        required: true
+    },
     cart_id: {
         type: Schema.Types.ObjectId,
         ref: 'Cart',

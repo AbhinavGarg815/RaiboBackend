@@ -34,6 +34,7 @@ const createOrder = asyncHandler(async (req, res) => {
     await Cart.findByIdAndUpdate(cart_id, { status: "closed" });
 
     const order = await Order.create({
+      user_id: req.user._id,
       cart_id: cart_id,
       address: address,
       payment_method: payment_method,
@@ -62,4 +63,20 @@ const getOrderById = asyncHandler(async (req, res) => {
   }
 });
 
-export { createOrder, getOrderById };
+const getOrdersByUserId = asyncHandler(async (req, res) => {
+  try {
+    const orders = await Order.find({ user_id: req.user._id })
+      .populate("cart_id")
+      .populate("address")
+      .populate("method_id");
+    if (!orders || orders.length === 0) {
+      return res.status(404).json({ message: "No orders found" });
+    }
+    res.status(200).json(orders);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}
+);
+
+export { createOrder, getOrderById, getOrdersByUserId };

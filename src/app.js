@@ -26,23 +26,18 @@ passport.use(jwtLogin);
 app.use('/api/v1/auth', authRoutes);
 
 import reviewRoutes from './routes/review.routes.js';
-
 app.use('/api/v1/review', reviewRoutes);
 
 import categoryRoutes from './routes/category.routes.js';
-
 app.use('/api/v1/category', categoryRoutes);
 
 import productRoutes from './routes/product.routes.js';
-
 app.use('/api/v1/product', productRoutes);
 
 import permissionRoutes from './routes/permission.routes.js';
-
 app.use('/api/v1/permission', permissionRoutes);
 
 import roleRoutes from './routes/role.routes.js';
-
 app.use('/api/v1/role', roleRoutes);
 
 import paymentMethodRoutes from './routes/paymentMethods.routes.js';
@@ -51,10 +46,8 @@ app.use('/api/v1/payment-methods', paymentMethodRoutes);
 import companyRoutes from './routes/company.routes.js';
 app.use('/api/v1/company', companyRoutes);
 
-
 import imageRoutes from './routes/images.routes.js';
 app.use('/api/v1/image', imageRoutes);
-
 
 import addressRoutes from './routes/address.routes.js';
 app.use('/api/v1/address', addressRoutes);
@@ -64,5 +57,11 @@ app.use('/api/v1/cart', cartRoutes);
 
 import orderRoutes from './routes/order.routes.js';
 app.use('/api/v1/order', orderRoutes);
+
+import kycRoutes from './routes/kyc.routes.js';
+app.use('/api/v1/kyc', kycRoutes);
+
+import userRoutes from './routes/user.routes.js';
+app.use('/api/v1/user', userRoutes);
 
 export default app;

@@ -1,7 +1,7 @@
 import mongoose, { Schema } from "mongoose";
 
 const permissionSchema = new Schema({
-    key: {
+    name: {
         type: String,
         required: true,
         unique: true,

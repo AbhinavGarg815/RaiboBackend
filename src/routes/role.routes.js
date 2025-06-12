@@ -5,7 +5,7 @@ import { authorizePermissionMiddleware } from "../middlewares/authorizePermissio
 
 const router = Router();
 
-router.use(jwtAuthenticator, authorizePermissionMiddleware('admin:all'));
+router.use(jwtAuthenticator, authorizePermissionMiddleware("admin"));
 
 router.post("/", createRole);
 router.get("/", getAllRoles);
