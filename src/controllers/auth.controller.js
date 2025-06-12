@@ -1,4 +1,5 @@
 import { User } from '../models/user.model.js';
+import { enqueJob } from '../utils/job.handler.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import bcrypt from 'bcrypt';
 import crypto from 'crypto';
@@ -160,24 +161,67 @@ const refreshToken = asyncHandler (async (req, res) => {
     });
 });
 
-const verifyEmail = asyncHandler(async (req, res) => {
-    const { token } = req.params;
+const verifyUser = asyncHandler(async (req, res) => {
 
-    const user = await User.findOne({
-        verificationToken: token,
-        verificationExpires: { $gt: Date.now() },
-    });
+    try{
+    const { verificationToken } = req.params;
 
-    if (!user) {
-        return res.status(400).json({ message: "Invalid or expired token" });
+    const user = await User.findOne({verificationToken});
+
+    if(!user) {
+        return res.status(400).json({
+            message: "Invalid verification code"
+        });
     }
+
+    else {
+        user.isVerified = true;
+        await user.save();
+        return res.status(200).json({
+            message: "User verified successfully"
+        });
+    }}
+    catch (error)
+    {
+        return res.status(500).json({
+            message: "An error occurred while verifying the user",
+            error: error.message
+        });
+    }
+
+});
+
+const requestVerify = asyncHandler(async (req, res) => {
+    const {id} = req.params;
+
+    const user = await User.findById(id);
+
+    if(user.isVerified) {
+        return res.status(400).json({
+            message: "User is already verified"
+        });
+    }
+
+    if(!user) {
+        return res.status(404).json({
+            message: "User not found"
+        });
+    }
+
+    const verificationToken = [...Array(32)].map(() => Math.floor(Math.random() * 16).toString(16)).join('');
+    user.verificationToken = verificationToken;
+    const values = {name: user.fullname, ctaLink: `${process.env.CLIENT_URL}/auth/verify/${verificationToken}`,ctaText:"Click here"}
+    await enqueJob([user._id],"verify-user-email", "email", values );
 
 
     await user.save();
 
-    res.status(200).json({ message: "Email verified successfully" });
-})
+    return res.status(200).json({
+        message: "Verification email sent"
+    });
 
 
 
-export { registerUser, loginUser, logoutUser, refreshToken, verifyEmail };
+});
+
+export { registerUser, loginUser, logoutUser, refreshToken , verifyUser, requestVerify};

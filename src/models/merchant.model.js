@@ -12,16 +12,18 @@ const merchantSchema = new Schema({
         required: true
     },
     users: [
-        {
+        //TODO: FIX THIS
+        {user: {
             type: Schema.Types.ObjectId,
             ref: 'User',
             required: true
         },
+        role:
         {
             type: String,
             enum: ['admin', 'staff'],
             required: true
-        }
+        }}
     ]
 })
 
