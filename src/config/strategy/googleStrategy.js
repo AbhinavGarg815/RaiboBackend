@@ -1,9 +1,6 @@
 import GoogleStrategy from "passport-google-oauth20";
 import {User} from "../../models/user.model.js";
 
-import dotenv from "dotenv";
-dotenv.config(); // Ensure environment variables are loaded
-
 
 const googleLogin =  new GoogleStrategy(
     {
@@ -13,9 +10,9 @@ const googleLogin =  new GoogleStrategy(
     },
     async (accessToken, refreshToken, profile, done) => {
         try {
-            const user = await User.findOne({ 
+            const user = await User.findOne({
                 $or: [
-                    { googleId: profile.id }, 
+                    { googleId: profile.id },
                     { email: profile.emails[0].value }
                 ]
             });
