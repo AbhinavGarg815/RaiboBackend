@@ -49,6 +49,10 @@ import commentRoutes from './routes/comment.routes.js';
 
 app.use('/api/v1/comment', commentRoutes);
 
+import roomRoutes from './routes/room.routes.js';
+
+app.use('/api/v1/room', roomRoutes);
+
 import paymentMethodRoutes from './routes/paymentMethods.routes.js';
 app.use('/api/v1/payment-methods', paymentMethodRoutes);
 
