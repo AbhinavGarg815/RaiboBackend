@@ -122,6 +122,7 @@ const loginUser = asyncHandler(async (req, res) => {
             phone: user.phone,
             role: user.role,
             ...(user.role.includes('seller') && { companyId: user.companyId }),
+            points: user.points
         }
     });
 });
