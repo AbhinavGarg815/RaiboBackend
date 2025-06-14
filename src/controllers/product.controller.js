@@ -63,7 +63,7 @@ const getAllProducts = asyncHandler(async (req, res) => {
 const getAllProductsBuyer = asyncHandler(async (req, res) => {
 
     const user_id = req.user?._id; // Get user ID if authenticated
-    const products = await Product.find({ status: 'approved' }).populate('category_id').populate('company_id'); // Only fetch approved products
+    const products = await Product.find().populate('category_id').populate('company_id'); // Only fetch approved products
 
     const productsWithLikeStatus = await Promise.all(products.map(async (product) => {
         const isLikedByUser = user_id ? product.likedBy.includes(user_id) : false;
