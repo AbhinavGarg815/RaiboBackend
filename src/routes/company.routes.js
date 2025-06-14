@@ -6,7 +6,7 @@ import { createCompany , getAllCompanies, getCompanyById, updateCompany, deleteC
 const router = express.Router();
 
 
-router.post('/', jwtAuthenticator,  companyCreateValidator, createCompany);
+router.post('/', jwtAuthenticator, companyCreateValidator, createCompany);
 router.get('/', jwtAuthenticator, getAllCompanies);
 router.get('/:id', jwtAuthenticator,getCompanyById);
 router.put('/:id', jwtAuthenticator, companyUpdateValidator,updateCompany);

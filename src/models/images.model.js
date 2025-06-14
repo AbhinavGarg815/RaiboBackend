@@ -7,9 +7,6 @@ const imageSchema = new Schema({
         required: true,
         trim: true,
     },
-    embedding: {
-        type: [Number],
-    },
     public_id: {
         type: String,
         required: true,

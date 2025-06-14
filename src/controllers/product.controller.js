@@ -6,9 +6,13 @@ import { Image } from "../models/images.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { Comment } from "../models/comment.model.js";
 import { User } from "../models/user.model.js";
+import axios from "axios";
+import qdrantClient from "../db/qdrant.client.js";
+import { v4 as uuidv4 } from "uuid";
+
 
 const createProduct = asyncHandler(async (req, res) => {
-    const { name, description, price, quantity, category_id, company_id, images = [], discount, discount_valid_until } = req.body;
+    const { name, description, price, quantity, category_id, company_id, images = [], imageUrls = [], discount, discount_valid_until } = req.body;
 
     if ([name, description, price, quantity, category_id, company_id].some((field) => typeof field === 'string' && field.trim() === "")) {
         throw new ApiError(400, "All required fields are missing or empty");
@@ -36,11 +40,42 @@ const createProduct = asyncHandler(async (req, res) => {
         quantity,
         category_id,
         company_id,
-        imageUrls: images,
+        images: images,
+        imageUrls: imageUrls,
         discount,
         discount_valid_until,
         status: 'pending' // Set initial status to pending
     });
+
+    await Image.updateMany(
+        { _id: { $in: images } },
+        { $set: { reference_id: product._id, type: 'product' } }
+    );
+
+    const imageDocs = await Image.find({ _id: { $in: images } });
+
+    for (const image of imageDocs) {
+        const clipResponse = await axios.post(`${process.env.CLIP_URL}/embed-image`, {
+            image_url: image.url,
+        });
+        const embedding = clipResponse.data.image_features;
+
+        let pointId = uuidv4(); // Generate a unique ID for the point
+
+        await qdrantClient.upsert(process.env.QDRANT_COLLECTION_NAME, {
+            points: [
+                {
+                    id: pointId,
+                    vector: { "vector": embedding },
+                    payload: {
+                        url: image.url,
+                        type: 'product',
+                        reference_id: product._id,
+                    },
+                },
+            ],
+        });
+    }
 
     res.status(201).json({
         message: "Product created successfully", product,

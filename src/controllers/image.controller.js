@@ -5,9 +5,7 @@ import fs from "fs";
 
 const uploadImage = asyncHandler(async (req, res) => {
   const { path } = req.file;
-  const { type } = req.body;
-
-  // Process the uploaded image here
+  const { type, reference_id = null } = req.body;
 
   try {
     const result = await cloudinary.v2.uploader.upload(path);
@@ -15,6 +13,7 @@ const uploadImage = asyncHandler(async (req, res) => {
       url: result.url,
       public_id: result.public_id,
       type: type,
+      reference_id: reference_id,
     });
 
     await image.save();
