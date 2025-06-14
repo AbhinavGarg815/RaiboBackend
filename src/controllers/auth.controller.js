@@ -49,7 +49,7 @@ const registerUser = asyncHandler(async (req, res) => {
         return;
     }
 
-    const verificationToken = crypto.randomBytes(20).toString('hex');
+    const token = crypto.randomBytes(20).toString('hex');
     const newUser = new User({
         fullname,
         email,
@@ -57,7 +57,7 @@ const registerUser = asyncHandler(async (req, res) => {
         phone: role === 'buyer' ? phone : undefined,
         role,
         ...(role === 'seller' && { companyId: companyId ? new mongoose.Types.ObjectId(companyId) : undefined }),
-        verificationToken,
+        token,
     });
     await newUser.save();
     res.status(200).json({ message: "User registered successfully. Verification email will be sent later." });
@@ -143,7 +143,7 @@ const refreshToken = asyncHandler (async (req, res) => {
     if (!refreshToken) {
         return res.status(403).json({ message: "Refresh token not found" });
     }
-    
+
     let decoded;
     try {
         decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
@@ -162,12 +162,12 @@ const refreshToken = asyncHandler (async (req, res) => {
     });
 });
 
-const verifyUser = asyncHandler(async (req, res) => {
+const verifyEmail = asyncHandler(async (req, res) => {
 
     try{
-    const { verificationToken } = req.params;
+    const { token } = req.params;
 
-    const user = await User.findOne({verificationToken});
+    const user = await User.findOne({token});
 
     if(!user) {
         return res.status(400).json({
@@ -209,9 +209,9 @@ const requestVerify = asyncHandler(async (req, res) => {
         });
     }
 
-    const verificationToken = [...Array(32)].map(() => Math.floor(Math.random() * 16).toString(16)).join('');
-    user.verificationToken = verificationToken;
-    const values = {name: user.fullname, ctaLink: `${process.env.CLIENT_URL}/auth/verify/${verificationToken}`,ctaText:"Click here"}
+    const token = [...Array(32)].map(() => Math.floor(Math.random() * 16).toString(16)).join('');
+    user.token = token;
+    const values = {name: user.fullname, ctaLink: `${process.env.CLIENT_URL}/auth/verify/${token}`,ctaText:"Click here"}
     await enqueJob([user._id],"verify-user-email", "email", values );
 
 
@@ -225,4 +225,4 @@ const requestVerify = asyncHandler(async (req, res) => {
 
 });
 
-export { registerUser, loginUser, logoutUser, refreshToken , verifyUser, requestVerify};
+export { registerUser, loginUser, logoutUser, refreshToken , verifyEmail, requestVerify};

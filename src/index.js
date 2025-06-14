@@ -1,12 +1,9 @@
-import dotenv from "dotenv";
-import { connect } from "mongoose";
+import './config/env.config.js'; //ensure config is loaded first
+
 import connectDB from "./db/index.js";
 import {connectCloudinary} from "./config/cloudinary.config.js";
 import app from "./app.js";
 
-dotenv.config({
-    path: './.env'
-})
 
 app.get("/", (req, res) => {
     res.send("Raibo backend");
