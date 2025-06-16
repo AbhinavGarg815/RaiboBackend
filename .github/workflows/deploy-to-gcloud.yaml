@@ -8,6 +8,7 @@ on:
 
 jobs:
   deploy:
+    environment: Raibo
     runs-on: ubuntu-latest
 
     steps:
