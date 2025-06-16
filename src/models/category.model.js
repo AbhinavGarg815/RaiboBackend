@@ -5,6 +5,15 @@ const categorySchema = new Schema({
         type: String,
         required: true,
         trim: true,
+    },
+    displayImage: {
+        type: String, // cloudinary URL
+    },
+    displayIcon: {
+        type: String, // cloudinary URL
+    },
+    description: {
+        type: String,
     }
 })
 

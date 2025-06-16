@@ -6,7 +6,7 @@ import { ApiResponse } from '../utils/ApiResponse.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 
 const createRoom = asyncHandler(async (req, res) => {
-    const { name } = req.body;
+    const { name, description, room_type } = req.body;
     const user_id = req.user._id;
 
     if (!name) {
@@ -15,6 +15,8 @@ const createRoom = asyncHandler(async (req, res) => {
 
     const room = await Room.create({
         name,
+        description,
+        room_type,
         user_id
     });
 

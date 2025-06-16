@@ -70,7 +70,11 @@ const getAllProductsBuyer = asyncHandler(async (req, res) => {
         const comments = await Comment.find({ reference: product._id, onModel: 'Product', type: 'external', isDeleted: false })
             .select('_id content parentComment');
         const { likedBy, ...productWithoutLikedBy } = product.toObject();
-        return { ...productWithoutLikedBy, isLikedByUser, comments: comments };
+        const imageUrls = [
+            "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?q=80&w=1916&auto=format&fit=crop",
+            "https://images.unsplash.com/photo-1540932239986-30128078f3c5?q=80&w=1587&auto=format&fit=crop"
+        ];
+        return { ...productWithoutLikedBy, imageUrls,  isLikedByUser, comments: comments };
     }));
 
     res.status(200).json({
@@ -97,11 +101,15 @@ const getProductById = asyncHandler(async (req, res) => {
 
     // Determine if the user has liked the product
     const isLikedByUser = product.likedBy.includes(user_id);
-
+    const imageUrls = [
+        "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?q=80&w=1916&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1540932239986-30128078f3c5?q=80&w=1587&auto=format&fit=crop"
+    ];
     res.status(200).json({
         message: "Product fetched successfully",
         product: {
             ...product.toObject(),
+            imageUrls,
             isLikedByUser,
             likesCount: product.likesCount,
             comments: comments, // Include comments in the response

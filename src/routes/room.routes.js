@@ -11,8 +11,8 @@ import { jwtAuthenticator } from '../middlewares/passport.middleware.js';
 const router = Router();
 
 router.post('/', jwtAuthenticator, createRoom);
-router.post('/:roomId/product', jwtAuthenticator, addProductToRoom);
-router.delete('/:roomId/product', jwtAuthenticator, removeProductFromRoom);
+router.post('/product/:roomId', jwtAuthenticator, addProductToRoom);
+router.delete('/product/:roomId', jwtAuthenticator, removeProductFromRoom);
 router.get('/', jwtAuthenticator, getUserRooms);
 router.delete('/:roomId', jwtAuthenticator, deleteRoom);
 

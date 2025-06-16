@@ -15,7 +15,7 @@ const loginUserGoogleCallback = asyncHandler( async (req, res) => {
 
     res.status(200).json({
         message: "Login successful",
-        accessToken,
+        access_token: accessToken,
         user: {
             _id: user._id,
             fullname: user.fullname,
