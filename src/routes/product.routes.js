@@ -22,6 +22,7 @@ router.put("/admin/reject/:productId", jwtAuthenticator, rejectProduct);
 // Buyer Route
 router.get('/:id',jwtAuthenticator, productGetByIdValidator, getProductById);
 router.get('/',jwtAuthenticator, getAllProductsBuyer);
+router.get('/for-you', getAllProductsBuyer)
 //Like Route
 router.post('/like',jwtAuthenticator, handleLike);
 

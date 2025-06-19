@@ -1,7 +1,6 @@
 import { Strategy as GoogleTokenStrategy } from "passport-google-verify-token";
 import { User } from "../../models/user.model.js";
-import dotenv from "dotenv";
-dotenv.config();
+
 
 const googleTokenLogin = new GoogleTokenStrategy(
     {
@@ -10,9 +9,9 @@ const googleTokenLogin = new GoogleTokenStrategy(
         // audience: [process.env.GOOGLE_CLIENT_ID, process.env.GOOGLE_CLIENT_ID_MOBILE]
     },
     async (parsedToken, googleId, done) => {
-        
+
         const data = JSON.parse(parsedToken.body);
-            
+
         try {
             // Find user by Google ID or email
             if (!data || !data.sub || !data.email) {

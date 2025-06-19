@@ -18,7 +18,7 @@ const commentSchema = new mongoose.Schema({
     onModel: {
         type: String,
         required: true,
-        enum: ['Product', 'Comment', 'Company'], // Add other models as needed
+        enum: ['Product', 'Comment', 'Company', 'KYC'], // Add other models as needed
     },
     type: {
         type: String,

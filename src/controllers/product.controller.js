@@ -6,10 +6,10 @@ import { Image } from "../models/images.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { Comment } from "../models/comment.model.js";
 import { User } from "../models/user.model.js";
+import { ProductMapper } from "../mappers/product.mapper.js";
 import axios from "axios";
 import qdrantClient from "../db/qdrant.client.js";
 import { v4 as uuidv4 } from "uuid";
-
 
 const createProduct = asyncHandler(async (req, res) => {
     const { name, description, price, quantity, category_id, company_id, images = [], imageUrls = [], discount, discount_valid_until } = req.body;
@@ -27,12 +27,7 @@ const createProduct = asyncHandler(async (req, res) => {
         });
         return;
     }
-    // if (!category) {
-    //     res.status(400).json({
-    //         message: "Category not found",
-    //     }); 
-    //     return; 
-    // }
+
     const product = await Product.create({
         name,
         description,
@@ -89,28 +84,33 @@ const getAllProducts = asyncHandler(async (req, res) => {
     }
     const products = await Product.find({ company_id }).populate('category_id').populate('company_id');
 
+    const productDetails = await Promise.all(products.map(async (product) => {
+        const isLikedByUser = user_id ? product.likedBy.includes(user_id) : false;
+        const comments = await Comment.find({ reference: product._id, onModel: 'Product', type: 'external', isDeleted: false })
+            .select('_id content parentComment');
+        return ProductMapper.toProductDetailResponse(product.toObject(), comments || [], isLikedByUser);
+    }));
+
     res.status(200).json({
         message: "Products fetched successfully",
-        products,
+        products: productDetails,
     });
 })
 
 const getAllProductsBuyer = asyncHandler(async (req, res) => {
 
     const user_id = req.user?._id; // Get user ID if authenticated
-    const products = await Product.find({ status: 'approved' }).populate('category_id').populate('company_id'); // Only fetch approved products
+    const products = await Product.find().populate('category_id').populate('company_id'); // Only fetch approved products
 
-    const productsWithLikeStatus = await Promise.all(products.map(async (product) => {
+    const productDetails = await Promise.all(products.map(async (product) => {
         const isLikedByUser = user_id ? product.likedBy.includes(user_id) : false;
         const comments = await Comment.find({ reference: product._id, onModel: 'Product', type: 'external', isDeleted: false })
             .select('_id content parentComment');
-        const { likedBy, ...productWithoutLikedBy } = product.toObject();
-        return { ...productWithoutLikedBy, isLikedByUser, comments: comments };
+        return ProductMapper.toProductDetailResponse(product, comments || [], isLikedByUser);
     }));
 
     res.status(200).json({
-        message: "Products fetched successfully",
-        products: productsWithLikeStatus,
+        products: productDetails,
     });
 })
 
@@ -127,21 +127,14 @@ const getProductById = asyncHandler(async (req, res) => {
     }
 
     // Fetch external comments for the product
+    const isLikedByUser = true ? product.likedBy.includes(user_id) : false;
     const comments = await Comment.find({ reference: product._id, onModel: 'Product', type: 'external', isDeleted: false })
         .select('_id content parentComment');
 
     // Determine if the user has liked the product
-    const isLikedByUser = product.likedBy.includes(user_id);
-
+    const productDetailResponse = ProductMapper.toProductDetailResponse(product, comments, isLikedByUser);
     res.status(200).json({
-        message: "Product fetched successfully",
-        product: {
-            ...product.toObject(),
-            isLikedByUser,
-            likesCount: product.likesCount,
-            comments: comments, // Include comments in the response
-            likedBy: undefined // Exclude likedBy array
-        },
+        product: productDetailResponse,
     });
 });
 

@@ -4,16 +4,18 @@ import {
     addProductToRoom,
     removeProductFromRoom,
     getUserRooms,
-    deleteRoom
+    deleteRoom,
+    getRoomById
 } from '../controllers/room.controller.js';
 import { jwtAuthenticator } from '../middlewares/passport.middleware.js';
 
 const router = Router();
 
 router.post('/', jwtAuthenticator, createRoom);
-router.post('/:roomId/product', jwtAuthenticator, addProductToRoom);
-router.delete('/:roomId/product', jwtAuthenticator, removeProductFromRoom);
+router.post('/product/:roomId', jwtAuthenticator, addProductToRoom);
+router.delete('/product/:roomId', jwtAuthenticator, removeProductFromRoom);
 router.get('/', jwtAuthenticator, getUserRooms);
 router.delete('/:roomId', jwtAuthenticator, deleteRoom);
+router.get('/:roomId', jwtAuthenticator, getRoomById);
 
 export default router;
