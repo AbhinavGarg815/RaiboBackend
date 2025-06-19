@@ -2,6 +2,7 @@ import { Product } from '../models/product.model.js';
 import axios from 'axios';
 import FormData from 'form-data';
 import fs from 'fs';
+import qdrantClient from '../db/qdrant.client.js';
 
 async function fetchEmbedding({ text, imageFile }) {
     const formData = new FormData();
@@ -54,35 +55,44 @@ async function fetchEmbedding({ text, imageFile }) {
 }
 
 async function queryQdrant(embedding) {
-    const qdrantResponse = await axios.post(`${process.env.QDRANT_URL}/collections/${process.env.QDRANT_COLLECTION_NAME}/points/query`,
-        {
-            "using": "vector",
-            "query": embedding,
-            "limit": 5, // Adjust the limit as needed
-            "with_payload": true,
-        }, {
-        headers: {
-            'Content-Type': 'application/json',
-            'Api-Key': process.env.QDRANT_API_KEY,
-        },
-    });
+    try {
+        const qdrantResponse = await qdrantClient.query(process.env.QDRANT_COLLECTION_NAME,
+            {
+                "using": "vector",
+                "query": embedding,
+                "limit": 5, // Adjust the limit as needed
+                "with_payload": true,
+                "params": {
+                    "exact": true,
+                }
+            }, {
+            headers: {
+                'Content-Type': 'application/json',
+                'Api-Key': process.env.QDRANT_API_KEY,
+            },
+        });
 
-    console.log('Qdrant response:', qdrantResponse.data);
-
-    const result = qdrantResponse.data.result?.points || [];
-    const reference_ids = result.map(point => point.payload.reference_id).filter(Boolean);
-    const productIds = [];
-    const seen = new Set();
-    for (const id of reference_ids) {
-        if (!seen.has(id)) {
-            seen.add(id);
-            productIds.push(id);
+        const result = qdrantResponse?.points || [];
+        const reference_ids = result.map(point => point.payload.reference_id).filter(Boolean);
+        const productIds = [];
+        const seen = new Set();
+        for (const id of reference_ids) {
+            if (!seen.has(id)) {
+                seen.add(id);
+                productIds.push(id);
+            }
         }
+
+        const products = await Product.find({ _id: { $in: productIds } });
+        const orderedProducts = productIds.map(id =>
+            products.find(product => product._id.toString() === id)
+        ).filter(Boolean);
+
+        return orderedProducts;
+    } catch (error) {
+        console.error('Error querying Qdrant:', error.message);
+        throw new Error('Failed to query Qdrant');
     }
-
-    const products = await Product.find({ _id: { $in: productIds } });
-
-    return products;
 }
 
 export async function searchProducts({ text, imageFile }) {
