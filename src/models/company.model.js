@@ -55,6 +55,6 @@ const companySchema = new Schema({
         default: []
     },
     kyc: [kycSchema],
-})
+}, { _id: true })
 
 export const Company = mongoose.model("Company", companySchema)

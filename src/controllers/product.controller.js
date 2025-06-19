@@ -7,16 +7,21 @@ import { ApiError } from "../utils/ApiError.js";
 import { Comment } from "../models/comment.model.js";
 import { User } from "../models/user.model.js";
 import { ProductMapper } from "../mappers/product.mapper.js";
+import axios from "axios";
+import qdrantClient from "../db/qdrant.client.js";
+import { v4 as uuidv4 } from "uuid";
+import { upsertPoint } from "../services/qdrant.service.js"; 
+import FormData from "form-data";
 
 const createProduct = asyncHandler(async (req, res) => {
-    const { name, description, price, quantity, category_id, company_id, images = [], discount, discount_valid_until } = req.body;
+    const { name, description, price, quantity, category_id, company_id, images = [], imageUrls = [], discount, discount_valid_until } = req.body;
 
     if ([name, description, price, quantity, category_id, company_id].some((field) => typeof field === 'string' && field.trim() === "")) {
         throw new ApiError(400, "All required fields are missing or empty");
     }
 
     const company = await Company.findById(company_id);
-    // const category = await Category.findById(category_id);
+    const category = await Category.findById(category_id);
 
     if (!company) {
         res.status(400).json({
@@ -32,11 +37,74 @@ const createProduct = asyncHandler(async (req, res) => {
         quantity,
         category_id,
         company_id,
-        imageUrls: images,
+        images: images,
+        imageUrls: imageUrls,
         discount,
         discount_valid_until,
         status: 'pending' // Set initial status to pending
     });
+
+    await Image.updateMany(
+        { _id: { $in: images } },
+        { $set: { reference_id: product._id, type: 'product' } }
+    );
+
+    let formData = new FormData();
+    const text = `${company.name} ${category.name} ${product.name} ${product.description}`;
+    formData.append('text_query', text);
+    const clipResponseText = await axios.post(`${process.env.CLIP_URL}/embed-text`, formData, {
+        headers: {
+            ...formData.getHeaders(),
+        },
+    });
+    const textEmbedding = clipResponseText.data.text_embedding;
+
+    let pointId = uuidv4(); 
+    upsertPoint(textEmbedding, {
+        id: pointId,
+        type: 'product',
+        reference_id: product._id,
+        embedding_type: 'text',
+    });
+
+    const imageDocs = await Image.find({ _id: { $in: images } });
+    for (const image of imageDocs) {
+        const imageFormData = new FormData();
+        imageFormData.append('image_url', image.url);
+        const clipResponseImage = await axios.post(`${process.env.CLIP_URL}/embed-image`, imageFormData, {
+            headers: {
+                ...imageFormData.getHeaders(),
+            },
+        });
+        const imageEmbedding = clipResponseImage.data.image_embedding;
+
+        let pointId = uuidv4(); // Generate a unique ID for the point
+        upsertPoint(imageEmbedding, {
+            id: pointId,
+            type: 'product',
+            url: image.url,
+            reference_id: product._id,
+            embedding_type: 'image',
+        });
+
+        const combinedFormData = new FormData();
+        combinedFormData.append('image_url', image.url);
+        combinedFormData.append('text_query', text);
+        const clipResponseCombined = await axios.post(`${process.env.CLIP_URL}/embed-image-text`, combinedFormData, {
+            headers: {
+                ...combinedFormData.getHeaders(),
+            },
+        });
+        const combinedEmbedding = clipResponseCombined.data.combined_embedding;
+        pointId = uuidv4(); // Generate a unique ID for the point
+        upsertPoint(combinedEmbedding, {
+            id: pointId,
+            type: 'product',
+            url: image.url,
+            reference_id: product._id,
+            embedding_type: 'combined',
+        });
+    }
 
     res.status(201).json({
         message: "Product created successfully", product,
