@@ -178,9 +178,7 @@ const verifyEmail = asyncHandler(async (req, res) => {
     else {
         user.isVerified = true;
         await user.save();
-        return res.status(200).json({
-            message: "User verified successfully"
-        });
+        return res.redirect(`${process.env.FRONTEND_URL}/login`);
     }}
     catch (error)
     {
@@ -210,8 +208,8 @@ const requestVerify = asyncHandler(async (req, res) => {
     }
 
     const token = [...Array(32)].map(() => Math.floor(Math.random() * 16).toString(16)).join('');
-    user.token = token;
-    const values = {name: user.fullname, ctaLink: `${process.env.CLIENT_URL}/auth/verify/${token}`,ctaText:"Click here"}
+    user.verificationToken = token;
+    const values = {name: user.fullname, ctaLink: `${process.env.BACKEND_URL}/api/v1/auth/verify-email/${token}`,ctaText:"Click here"}
     await enqueJob([user._id],"verify-user-email", "email", values );
 
 
