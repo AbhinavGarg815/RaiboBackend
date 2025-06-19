@@ -167,7 +167,7 @@ const verifyEmail = asyncHandler(async (req, res) => {
     try{
     const { token } = req.params;
 
-    const user = await User.findOne({token});
+    const user = await User.findOne({verificationToken:token});
 
     if(!user) {
         return res.status(400).json({
