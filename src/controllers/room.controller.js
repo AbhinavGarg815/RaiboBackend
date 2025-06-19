@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 import { Room } from '../models/room.model.js';
 import { Product } from '../models/product.model.js'; // Assuming a Product model exists
+import { mapRoomToRoomResponse } from '../mappers/room.mapper.js';
 import { ApiError } from '../utils/ApiError.js';
 import { ApiResponse } from '../utils/ApiResponse.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
@@ -23,8 +24,8 @@ const createRoom = asyncHandler(async (req, res) => {
     if (!room) {
         throw new ApiError(500, "Failed to create room");
     }
-
-    return res.status(201).json(new ApiResponse(201, room, "Room created successfully"));
+    const roomResponse = mapRoomToRoomResponse(room);
+ return res.status(201).json(new ApiResponse(201, roomResponse, "Room created successfully"));
 });
 
 const addProductToRoom = asyncHandler(async (req, res) => {
@@ -58,7 +59,11 @@ const addProductToRoom = asyncHandler(async (req, res) => {
         room.products.push({ product_id: new mongoose.Types.ObjectId(product_id), quantity });
     }
     await room.save();
-    return res.status(200).json(new ApiResponse(200, room, "Product added to room successfully"));
+
+    // Fetch all products associated with the room after saving
+    const updatedRoomWithProducts = await Room.findById(roomId).populate('products.product_id');
+    const roomResponse = mapRoomToRoomResponse(updatedRoomWithProducts);
+ return res.status(200).json(new ApiResponse(200, roomResponse, "Product added to room successfully"));
 });
 
 const removeProductFromRoom = asyncHandler(async (req, res) => {
@@ -83,16 +88,17 @@ const removeProductFromRoom = asyncHandler(async (req, res) => {
 
     await room.save();
 
-    return res.status(200).json(new ApiResponse(200, room, "Product removed from room successfully"));
+    const roomResponse = mapRoomToRoomResponse(room);
+ return res.status(200).json(new ApiResponse(200, roomResponse, "Product removed from room successfully"));
 });
 
 const getUserRooms = asyncHandler(async (req, res) => {
     const user_id = req.user._id;
 
     const rooms = await Room.find({ user_id }).populate('products.product_id');
-
+    const roomResponses = rooms.map(room => mapRoomToRoomResponse(room));
     return res.status(200).json({
-        rooms,
+        rooms: roomResponses,
         message: "User rooms fetched successfully"}
     );
 });
@@ -110,10 +116,23 @@ const deleteRoom = asyncHandler(async (req, res) => {
     return res.status(200).json(new ApiResponse(200, null, "Room deleted successfully"));
 });
 
+const getRoomById = asyncHandler(async (req, res) => {
+    const { roomId } = req.params;
+    const user_id = req.user._id;
+    const room = await Room.findById(roomId).populate('products.product_id');
+    if (!room) {
+        throw new ApiError(404, "Room not found");
+    }
+    const roomResponse = mapRoomToRoomResponse(room);
+    return res.status(200).json(new ApiResponse(200, roomResponse, "Room fetched successfully"));
+});
+
+
 export {
     createRoom,
     addProductToRoom,
     removeProductFromRoom,
     getUserRooms,
-    deleteRoom
+    deleteRoom,
+    getRoomById
 };
