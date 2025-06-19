@@ -54,8 +54,17 @@ async function fetchEmbedding({ text, imageFile }) {
 
 }
 
-async function queryQdrant(embedding) {
+async function queryQdrant(isText, isImageFile, embedding) {
     try {
+        let filter = { must: [] };
+        if (isText && isImageFile) {
+            filter.must.push({ key: 'embedding_type', match: { value: 'combined' } });
+        }
+        else if (isText) {
+            filter.must.push({ key: 'embedding_type', match: { value: 'text' } });
+        } else if (isImageFile) {
+            filter.must.push({ key: 'embedding_type', match: { value: 'image' } });
+        }
         const qdrantResponse = await qdrantClient.query(process.env.QDRANT_COLLECTION_NAME,
             {
                 "using": "vector",
@@ -64,7 +73,8 @@ async function queryQdrant(embedding) {
                 "with_payload": true,
                 "params": {
                     "exact": true,
-                }
+                },
+                "filter": filter
             }, {
             headers: {
                 'Content-Type': 'application/json',
@@ -90,7 +100,7 @@ async function queryQdrant(embedding) {
 
         return orderedProducts;
     } catch (error) {
-        console.error('Error querying Qdrant:', error.message);
+        console.error('Error querying Qdrant:', error);
         throw new Error('Failed to query Qdrant');
     }
 }
@@ -100,6 +110,6 @@ export async function searchProducts({ text, imageFile }) {
     if (!embedding || embedding.length === 0) {
         throw new Error('Failed to generate embedding');
     }
-    const products = await queryQdrant(embedding);
+    const products = await queryQdrant(text ? true : false, imageFile ? true : false, embedding);
     return products;
 }
