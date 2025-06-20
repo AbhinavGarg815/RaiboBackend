@@ -106,5 +106,6 @@ export async function searchProducts({ text, imageFile }) {
         throw new Error('Failed to generate embedding');
     }
     const productIds = await queryQdrant(text ? true : false, imageFile ? true : false, embedding);
+    console.info(productIds);
     return productIds;
 }

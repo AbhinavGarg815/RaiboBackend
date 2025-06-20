@@ -14,7 +14,7 @@ const search = asyncHandler(async (req, res) => {
         return res.status(400).json({ error: 'Either text or image is required for search' });
     }
     
-    // console.log(text);
+    console.info(text);
     // console.log(imageFile);
 
     try {
