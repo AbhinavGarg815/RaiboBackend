@@ -156,7 +156,6 @@ const updateBoard = asyncHandler(async (req, res) => {
         isPublic: updatedBoard.isPublic,
         settings: updatedBoard.settings,
     };
-    console.log(raiBoard);
     res.status(200).json(new ApiResponse(200, raiBoard, "Board updated successfully"));
 });
 

@@ -8,11 +8,11 @@ import { productCreateValidator, productDeleteValidator, productGetByCategoryVal
 // import { getProductsByCategory, getProductsByCompany } from '../controllers/product.controller.js';
 
 const router = Router();
-router.post('/seller/:company_id', jwtAuthenticator, productCreateValidator, createProduct);
-router.get('/seller/:company_id',jwtAuthenticator, getAllProducts);
-router.get('/seller/:company_id/:id',jwtAuthenticator, productGetByIdValidator, getProductById);
-router.put('/seller/:company_id/:id',jwtAuthenticator, productUpdateValidator, updateProduct);
-router.delete('/seller/:company_id/:id',jwtAuthenticator, productDeleteValidator, deleteProduct);
+router.post('/seller/', jwtAuthenticator, productCreateValidator, createProduct);
+router.get('/seller/',jwtAuthenticator, getAllProducts);
+router.get('/seller/:id',jwtAuthenticator, productGetByIdValidator, getProductById);
+router.put('/seller/:id',jwtAuthenticator, productUpdateValidator, updateProduct);
+router.delete('/seller/:id',jwtAuthenticator, productDeleteValidator, deleteProduct);
 
 // Admin routes for product verification
 router.get("/admin/pending", jwtAuthenticator, getPendingProducts);

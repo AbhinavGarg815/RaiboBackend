@@ -26,7 +26,8 @@ export class ProductDetailResponse {
         status,
         likesCount,
         isLikedByUser,
-        comments
+        comments,
+        model3dUrl
     }) {
         this._id = _id;
         this.name = name;
@@ -46,5 +47,6 @@ export class ProductDetailResponse {
         this.likesCount = likesCount;
         this.isLikedByUser = isLikedByUser;
         this.comments = comments;
+        this.model3dUrl = model3dUrl;
     }
 }

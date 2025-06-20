@@ -92,13 +92,8 @@ async function queryQdrant(isText, isImageFile, embedding) {
                 productIds.push(id);
             }
         }
-
-        const products = await Product.find({ _id: { $in: productIds } });
-        const orderedProducts = productIds.map(id =>
-            products.find(product => product._id.toString() === id)
-        ).filter(Boolean);
-
-        return orderedProducts;
+        return productIds;
+        
     } catch (error) {
         console.error('Error querying Qdrant:', error);
         throw new Error('Failed to query Qdrant');
@@ -110,6 +105,6 @@ export async function searchProducts({ text, imageFile }) {
     if (!embedding || embedding.length === 0) {
         throw new Error('Failed to generate embedding');
     }
-    const products = await queryQdrant(text ? true : false, imageFile ? true : false, embedding);
-    return products;
+    const productIds = await queryQdrant(text ? true : false, imageFile ? true : false, embedding);
+    return productIds;
 }

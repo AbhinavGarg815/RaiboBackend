@@ -117,12 +117,13 @@ const getAllProducts = asyncHandler(async (req, res) => {
         throw new ApiError(400, "Company ID is required");
     }
     const products = await Product.find({ company_id }).populate('category_id').populate('company_id');
-
+        // Fetch image URLs from the Image model
     const productDetails = await Promise.all(products.map(async (product) => {
         const isLikedByUser = user_id ? product.likedBy.includes(user_id) : false;
         const comments = await Comment.find({ reference: product._id, onModel: 'Product', type: 'external', isDeleted: false })
             .select('_id content parentComment');
-        return ProductMapper.toProductDetailResponse(product.toObject(), comments || [], isLikedByUser);
+        const images = await Image.find({ _id: { $in: product.images } }).select('url');
+        return ProductMapper.toProductDetailResponse(product.toObject(), comments || [], isLikedByUser, images);
     }));
 
     res.status(200).json({
@@ -140,7 +141,8 @@ const getAllProductsBuyer = asyncHandler(async (req, res) => {
         const isLikedByUser = user_id ? product.likedBy.includes(user_id) : false;
         const comments = await Comment.find({ reference: product._id, onModel: 'Product', type: 'external', isDeleted: false })
             .select('_id content parentComment');
-        return ProductMapper.toProductDetailResponse(product, comments || [], isLikedByUser);
+        const images = await Image.find({ _id: { $in: product.images } }).select('url');
+        return ProductMapper.toProductDetailResponse(product, comments || [], isLikedByUser, images);
     }));
 
     res.status(200).json({
@@ -149,8 +151,9 @@ const getAllProductsBuyer = asyncHandler(async (req, res) => {
 })
 
 const getProductById = asyncHandler(async (req, res) => {
-    const user_id = req.user._id; // Assuming user_id is available in the request body or can be retrieved from the session/auth
-    const product = await Product.findById(req.params.id)
+    const user_id = req.user._id; 
+    const productId = req.params.id; // Assuming user_id is available in the request body or can be retrieved from the session/auth
+    const product = await Product.findById(productId)
         .populate('category_id')
         .populate('company_id');
     if (!product) {
@@ -164,9 +167,9 @@ const getProductById = asyncHandler(async (req, res) => {
     const isLikedByUser = true ? product.likedBy.includes(user_id) : false;
     const comments = await Comment.find({ reference: product._id, onModel: 'Product', type: 'external', isDeleted: false })
         .select('_id content parentComment');
-
+    const images = await Image.find({ _id: { $in: product.images } }).select('url');
     // Determine if the user has liked the product
-    const productDetailResponse = ProductMapper.toProductDetailResponse(product, comments, isLikedByUser);
+    const productDetailResponse = ProductMapper.toProductDetailResponse(product, comments, isLikedByUser,images);
     res.status(200).json({
         product: productDetailResponse,
     });
