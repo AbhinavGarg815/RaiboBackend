@@ -6,6 +6,8 @@ import { Comment } from "../models/comment.model.js";
 import { ProductMapper } from "../mappers/product.mapper.js";
 
 const search = asyncHandler(async (req, res) => {
+    const TIMEOUT = 15000; // 15 seconds
+
     const text = req.body.text_query || null;
     const user_id = req.user?._id;
     const imageFile = req.file || null;
@@ -18,7 +20,14 @@ const search = asyncHandler(async (req, res) => {
     // console.log(imageFile);
 
     try {
-        const productIds = await searchProducts({ text, imageFile });
+        const timeoutPromise = new Promise((_, reject) =>
+            setTimeout(() => reject(new Error('Search service timed out')), TIMEOUT)
+        );
+
+        const productIds = await Promise.race([
+            searchProducts({ text, imageFile }),
+            timeoutPromise
+        ]);
         const products = await Product.find({ _id: { $in: productIds } }).populate('category_id').populate('company_id');
         // Fetch image URLs from the Image model
         const productDetails = await Promise.all(products.map(async (product) => {
