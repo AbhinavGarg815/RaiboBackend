@@ -9,8 +9,12 @@ import { jwtLogin } from './config/strategy/jwtStrategy.js';
 
 const app = express();
 
+app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', '*');
+    next();
+  });
 app.use(cors({
-    origin: process.env.CORS_ORIGIN,
+    origin: [process.env.CORS_ORIGIN],
     credentials: true,
 }))
 app.use(express.json({limit: "16kb"}))
