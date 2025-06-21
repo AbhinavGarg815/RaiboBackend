@@ -1,9 +1,8 @@
 import { User } from '../models/user.model.js';
-import { enqueJob } from '../utils/job.handler.js';
+import {sendVerificationEmail} from '../services/mailer.service.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import bcrypt from 'bcrypt';
 import crypto from 'crypto';
-import nodemailer from 'nodemailer';
 
 const registerUser = asyncHandler(async (req, res) => {
     if (!req.body) {
@@ -190,10 +189,10 @@ const verifyEmail = asyncHandler(async (req, res) => {
 
 });
 
-const requestVerify = asyncHandler(async (req, res) => {
+const requestVerificationEmail = asyncHandler(async (req, res) => {
     const {id} = req.params;
 
-    const user = await User.findById(id);
+    const user = await User.findById(id).populate('fullname').populate('isVerified');
 
     if(user.isVerified) {
         return res.status(400).json({
@@ -207,12 +206,9 @@ const requestVerify = asyncHandler(async (req, res) => {
         });
     }
 
-    const token = [...Array(32)].map(() => Math.floor(Math.random() * 16).toString(16)).join('');
-    user.verificationToken = token;
-    const values = {name: user.fullname, ctaLink: `${process.env.BACKEND_URL}/api/v1/auth/verify-email/${token}`,ctaText:"Click here"}
-    await enqueJob([user._id],"verify-user-email", "email", values );
+    const verificationToken = await sendVerificationEmail(user);
 
-
+    user.verificationToken = verificationToken;
     await user.save();
 
     return res.status(200).json({
@@ -223,4 +219,4 @@ const requestVerify = asyncHandler(async (req, res) => {
 
 });
 
-export { registerUser, loginUser, logoutUser, refreshToken , verifyEmail, requestVerify};
+export { registerUser, loginUser, logoutUser, refreshToken , verifyEmail, requestVerificationEmail};
