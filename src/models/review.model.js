@@ -8,7 +8,7 @@ const reviewSchema = new Schema({
     },
     buyer_id: {
         type: Schema.Types.ObjectId,
-        ref: 'Buyer',
+        ref: 'User',
         required: true
     },
     title: {
@@ -16,6 +16,14 @@ const reviewSchema = new Schema({
         required: true,
         trim: true,
     },
+    images:[
+        {
+            type: Schema.Types.ObjectId,
+            ref: 'Image',
+            required: false
+        }
+    ],
+
     content: {
         type: String,
         required: true,

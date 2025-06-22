@@ -66,10 +66,6 @@ const userSchema = new Schema(
         trim: true,
       },
     ],
-    isVerified: {
-      type: Boolean,
-      default: false,
-    },
     companyId: {
       type: Schema.Types.ObjectId,
       default: null,

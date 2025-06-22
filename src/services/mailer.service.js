@@ -1,6 +1,16 @@
 import { Job } from '../models/notif.model.js';
 import { PubSub } from '@google-cloud/pubsub';
 
+
+const sendVerificationEmail = async function(user)
+{
+    const token = [...Array(32)].map(() => Math.floor(Math.random() * 16).toString(16)).join('');
+    const values = {name: user.fullname, ctaLink: `${process.env.BACKEND_URL}/api/v1/auth/verify-email/${token}`,ctaText:"Click here"}
+    await enqueJob([user._id],"verify-user-email", "email", values );
+    return token;
+}
+
+
 const enqueJob =  async function(recievers, task, channel,values){
 
     try{
@@ -31,4 +41,4 @@ const enqueJob =  async function(recievers, task, channel,values){
     }
 }
 
-export {enqueJob};
+export {enqueJob , sendVerificationEmail};

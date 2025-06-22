@@ -1,5 +1,5 @@
 import { loginUserGoogleCallback } from '../controllers/google.auth.controller.js';
-import { loginUser, registerUser, logoutUser, refreshToken, verifyEmail , requestVerify } from '../controllers/auth.controller.js';
+import { loginUser, registerUser, logoutUser, refreshToken, verifyEmail , requestVerificationEmail } from '../controllers/auth.controller.js';
 import { Router } from "express";
 import { googleAuthenticator, googleCallbackAuthenticator } from '../middlewares/passport.middleware.js';
 
@@ -17,6 +17,6 @@ router.post('/login/google-auth', googleCallbackAuthenticator ,loginUserGoogleCa
 
 
 router.get('/verify-email/:token', verifyEmail);
-router.post('/request-verify/:id', requestVerify);
+router.post('/request-verify/:id', requestVerificationEmail);
 
 export default router
