@@ -5,6 +5,7 @@ import { Board } from '../models/board.model.js';
 import { Product } from '../models/product.model.js';
 import mongoose from 'mongoose';
 import { User } from '../models/user.model.js';
+import { Image } from '../models/images.model.js';
 
 const getBoards = asyncHandler(async (req, res) => {
     const userId = req.user._id;
@@ -272,11 +273,14 @@ export {
 const populateBoardProducts = async (products) => {
     return await Promise.all(products.map(async (product) => {
         const productDetails = await Product.findById(product.product_id);
+        const images = await Image.find({ _id: { $in: productDetails.images } }).select('url');
+        const imagesUrls = images.length > 0 ? images.map(image => image.url) : "";
+        console.log(imagesUrls);
         return {
             id: productDetails._id,
             productId: productDetails?._id || null,
             productName: productDetails?.name || 'Unknown Product',
-            productImage: productDetails?.imageUrls[0] || '',
+            productImage: productDetails?.imageUrls[0] || imagesUrls[0] || "",
             productPrice: productDetails?.price || 0,
             position: product.position || { x: 0, y: 0 },
             size: product.size || { width: 100, height: 100 },

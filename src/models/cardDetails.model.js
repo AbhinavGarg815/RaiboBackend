@@ -17,7 +17,7 @@ const cardDetailsSchema = new Schema({
         trim: true,
     },
     expiry_date: {
-        type: Schema.Types.Date,
+        type: String,
         required: true,
         trim: true,
     }

@@ -29,12 +29,7 @@ const orderCreateValidator = [
     .withMessage('Receiver phone must be a string')
     .notEmpty()
     .withMessage('Receiver phone is required')
-    .trim(),
-  body('delivery_date')
-    .optional()
-    .isISO8601()
-    .withMessage('Delivery date must be a valid ISO 8601 date'),
-  validationHandler,
+    .trim()
 ];
 
 const orderGetValidator = [

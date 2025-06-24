@@ -18,8 +18,12 @@ const orderSchema = new Schema({
     },
     status: {
         type: String,
-        enum: ['pending', 'completed', 'cancelled'],
+        enum: ['pending','confirmed', 'completed', 'cancelled'],
         default: 'pending',
+        required: true,
+    },
+    totalAmount: {
+        type: Number,
         required: true,
     },
     payment_method: {
@@ -43,7 +47,29 @@ const orderSchema = new Schema({
     },
     delivery_date: {
         type: Date
-    }
+    },
+    orderItems: [
+        {
+            product_id: {
+                type: Schema.Types.ObjectId,
+                ref: 'Product',
+                required: true
+            },
+            quantity: {
+                type: Number,
+                required: true
+            },
+            price: {
+                type: Number,
+                required: true
+            },
+            status: {
+                type: String,
+                enum: ['Pending','Confirmed', 'Shipped', 'Delivered', 'Cancelled'],
+                default: 'Pending',
+            },
+        },
+    ]
 },{
     timestamps: true,
 })

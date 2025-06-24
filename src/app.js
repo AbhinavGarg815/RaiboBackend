@@ -80,6 +80,9 @@ app.use('/api/v1/kyc', kycRoutes);
 import userRoutes from './routes/user.routes.js';
 app.use('/api/v1/user', userRoutes);
 
+import paymentRoutes from './routes/payment.routes.js';
+app.use('/api/v1/payments', paymentRoutes);
+
 import searchRoutes from './routes/search.routes.js';
 app.use('/api/v1/search', searchRoutes);
 
