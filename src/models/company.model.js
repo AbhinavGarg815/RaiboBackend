@@ -1,60 +1,57 @@
 import mongoose, { Schema } from "mongoose";
 
-const kycSchema = new Schema({
-    status: {
-        type: String,
-        enum: ['pending', 'approved', 'rejected'],
-        default: 'pending',
-    },
-    documentType: { 
-        type: String, 
-        required: true 
-    },
-    documentUrl: { 
-        type: String, 
-        required: true 
-    },
-    rejectionReason: { 
-        type: String, 
-        default: null 
-    },
-    submittedAt: { 
-        type: Date, 
-        default: Date.now 
-    },
-    reviewedAt: Date,
-    reviewedBy: { 
-        type: Schema.Types.ObjectId, 
-        ref: 'User', 
-        default: null 
-    }
-}, { _id: true });
-
 const companySchema = new Schema({
-    name: {
+    companyName: {
         type: String,
         required: true,
+        trim: true,
+    },
+    companyType: { 
+        type: String,
+        trim: true,
+    },
+    companyLogoUrl: { 
+        type: String,
+        trim: true,
+    },
+    description: { // Added description field
+        type: String,
+        trim: true,
+    },
+    address: { 
+        type: Schema.Types.ObjectId,
+        ref: 'Address',
+    },
+    contactName: {
+        type: String,
         trim: true,
     },
     email: {
         type: String,
-        required: true,
-        unique: true,
         trim: true,
-        lowercase: true
+        lowercase: true,
     },
-    address: {
+    contactPhone: {
+        type: String,
+        trim: true,
+    },
+    kyc: [{ // Reference to the new KYC model
         type: Schema.Types.ObjectId,
-        ref: 'Address',
-        required: true,
-        trim: true
+        ref: 'KYC',
+    }],
+    shops: [{
+        type: Schema.Types.ObjectId,
+        ref: 'Shop' 
+    }],
+    owner : {
+        type: Schema.Types.ObjectId,
+        ref: 'User',
     },
-    users: {
+    users: { 
         type: [Schema.Types.ObjectId],
         ref: 'User',
-        default: []
+        default: [],
     },
-    kyc: [kycSchema],
-}, { _id: true })
+}, { timestamps: true }); 
 
 export const Company = mongoose.model("Company", companySchema)

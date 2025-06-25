@@ -1,8 +1,10 @@
 import { User } from '../models/user.model.js';
-import {sendVerificationEmail} from '../services/mailer.service.js';
+import { Company } from '../models/company.model.js'; // Import the Company model
+import { sendVerificationEmail} from '../services/mailer.service.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import bcrypt from 'bcrypt';
 import crypto from 'crypto';
+import mongoose from 'mongoose'; // Import mongoose to use mongoose.Types.ObjectId
 
 const registerUser = asyncHandler(async (req, res) => {
     if (!req.body) {
@@ -12,7 +14,7 @@ const registerUser = asyncHandler(async (req, res) => {
         return;
     }
 
-    const { fullname, email, password, phone, role, companyId } = req.body;
+    const { fullname, email, password, phone, role, companyName } = req.body; // Changed companyId to companyName
 
     if (!email || !password || !role) {
         res.status(400).json({
@@ -28,9 +30,9 @@ const registerUser = asyncHandler(async (req, res) => {
         return;
     }
 
-    if (role === 'seller' && !companyId) {
+    if (role === 'seller' && !companyName) { // Check for companyName
         res.status(400).json({
-            message: "Sellers must provide a company ID"
+            message: "Sellers must provide a company name"
         });
         return;
     }
@@ -48,6 +50,19 @@ const registerUser = asyncHandler(async (req, res) => {
         return;
     }
 
+    let assignedCompanyId = null;
+
+    if (role === 'seller') {
+        // Create a new company
+        const newCompany = new Company({
+            companyName: companyName,
+            // You can add other default company details here if needed
+            contactEmail: email, // Assign the seller's email as contact email
+        });
+        await newCompany.save();
+        assignedCompanyId = newCompany._id;
+    }
+
     const token = crypto.randomBytes(20).toString('hex');
     const newUser = new User({
         fullname,
@@ -55,8 +70,8 @@ const registerUser = asyncHandler(async (req, res) => {
         password,
         phone: role === 'buyer' ? phone : undefined,
         role,
-        ...(role === 'seller' && { companyId: companyId ? new mongoose.Types.ObjectId(companyId) : undefined }),
-        token,
+        ...(assignedCompanyId && { companyId: assignedCompanyId }), // Assign the created company's ID,
+        companyId,
     });
     await newUser.save();
     res.status(200).json({ message: "User registered successfully. Verification email will be sent later." });

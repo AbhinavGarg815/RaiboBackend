@@ -29,25 +29,9 @@ const googleCallbackAuthenticator = (req, res, next) => {
       }
 
       req.user = user;
-      console.log("User authenticated successfully:", user);
-      next();
-    })(req, res, next);
-  }
-   else {
-    // For regular OAuth callback
-    passport.authenticate("google", { session: false }, (err, user, info) => {
-      if (err) {
-        console.error("Google authentication error:", err.message);
-        res.redirect(`${process.env.FRONTEND_URL}/login?error=auth_failed`)
+      if (info.newUser) {
+        req.newUser = true;
       }
-
-      if (!user) {
-        console.warn("Authentication failed:", info?.message || "Unknown reason");
-        return res.redirect(`${process.env.FRONTEND_URL}/login?error=auth_failed`);
-      }
-
-      req.user = user;
-      console.log("User authenticated successfully:", user);
       next();
     })(req, res, next);
   }
