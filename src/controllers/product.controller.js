@@ -7,10 +7,10 @@ import { ApiError } from "../utils/ApiError.js";
 import { Comment } from "../models/comment.model.js";
 import { ProductMapper } from "../mappers/product.mapper.js";
 import axios from "axios";
-import { v4 as uuidv4 } from "uuid";
+import { v5 as uuidv5 } from "uuid"; 
 import { upsertPoint } from "../services/qdrant.service.js";
 import FormData from "form-data";
-import { History } from "../models/history.model.js";
+import { NAMESPACE } from "../constants.js";
 
 const createProduct = asyncHandler(async (req, res) => {
     const { name, description, price, quantity, category_id, company_id, images = [], imageUrls = [], discount, discount_valid_until } = req.body;
@@ -58,7 +58,7 @@ const createProduct = asyncHandler(async (req, res) => {
     });
     const textEmbedding = clipResponseText.data.text_embedding;
 
-    let pointId = uuidv4();
+    let pointId = uuidv5(product._id.toString(), NAMESPACE);
     upsertPoint(textEmbedding, {
         id: pointId,
         type: 'product',
@@ -161,8 +161,6 @@ const getProductById = asyncHandler(async (req, res) => {
         });
         return;
     }
-
-    addProductToHistory(productId, user_id); // This should not be blocking the request
 
     // Fetch external comments for the product
     const isLikedByUser = true ? product.likedBy.includes(user_id) : false;
@@ -328,14 +326,6 @@ const handleLike = asyncHandler(async (req, res) => {
 
     res.status(200).json({ success: true, message: message, likesCount: product.likesCount });
 });
-
-//TODO: Add handlers for history management in a separate file
-const addProductToHistory = async function (productId, user_id) {
-            const historyEntry = new History({ productId, viewedBy: user_id });
-            historyEntry.save().catch(err => {
-                console.error("Error saving history entry:", err);
-            });
-        }
 
 export {
     createProduct,

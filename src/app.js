@@ -86,4 +86,10 @@ app.use('/api/v1/payments', paymentRoutes);
 import searchRoutes from './routes/search.routes.js';
 app.use('/api/v1/search', searchRoutes);
 
+import interactionRoutes from './routes/interaction.routes.js';
+app.use('/api/v1/interaction', interactionRoutes);
+
+import recommendationRoutes from './routes/recommendation.routes.js';
+app.use('/api/v1/recommendation', recommendationRoutes);
+
 export default app;
