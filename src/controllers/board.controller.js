@@ -233,8 +233,7 @@ const removeProductFromBoard = asyncHandler(async (req, res) => {
 
     const initialProductCount = board.products.length;
     board.products = board.products.filter(p => p.product_id.toString() !== productId);
-    console.log(initialProductCount);
-    console.log(board.products.length);
+
     if (board.products.length === initialProductCount) {
         throw new ApiError(404, "Product not found in the board");
     }
@@ -275,7 +274,6 @@ const populateBoardProducts = async (products) => {
         const productDetails = await Product.findById(product.product_id);
         const images = await Image.find({ _id: { $in: productDetails.images } }).select('url');
         const imagesUrls = images.length > 0 ? images.map(image => image.url) : "";
-        console.log(imagesUrls);
         return {
             id: productDetails._id,
             productId: productDetails?._id || null,

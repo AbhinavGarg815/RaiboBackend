@@ -8,7 +8,7 @@ const getCartByBuyerId = asyncHandler(async (req, res) => {
 
     const cart = await Cart.findOne({ buyer_id, status:'open'}).populate("products.product_id");
     if (!cart) {
-        console.log("creating new cart");
+        // console.log("creating new cart");
         const cart = await Cart.create({buyer_id:buyer_id, status:'open', products:[]});
         await cart.save();
         return res.status(200).json({ message: "cart fetched successfully", cart});
@@ -23,7 +23,7 @@ const addProductToCart = asyncHandler(async (req, res) => {
 
     const cart = await Cart.findOne({ buyer_id:buyer_id, status:'open'});
     if (!cart) {
-        console.log("creating new cart");
+        // console.log("creating new cart");
         const cart = await Cart.create({buyer_id:buyer_id, status:'open', products:[{product_id , quantity}]});
         await cart.save();
         return res.status(200).json({ message: "Product added to cart", cart });
