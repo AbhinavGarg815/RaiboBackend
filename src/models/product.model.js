@@ -6,12 +6,12 @@ const productSchema = new Schema({
         required: true,
         trim: true,
     },
-    companyProductId: {
-        type: String, // Changed type to ObjectId
-        required: false,
-        default: () => new String(mongoose.Types.ObjectId()), // Auto-generate ObjectId if not provided
-        unique: true
-    },
+    // companyProductId: {
+    //     type: String, // Changed type to ObjectId
+    //     required: false,
+    //     default: () => new String(mongoose.Types.ObjectId()), // Auto-generate ObjectId if not provided
+    //     unique: true
+    // },
     description: {
         type: String,
         required: true,
