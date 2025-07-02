@@ -1,17 +1,19 @@
 import mongoose from 'mongoose';
 
-const raiBoardInviteSchema = new mongoose.Schema({
+const inviteSchema = new mongoose.Schema({
   boardId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Board',
     required: true,
   },
-  inviterName: {
-    type: String,
+  inviter: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
     required: true,
   },
-  inviteeEmail: {
-    type: String,
+  invitedUser: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
     required: true,
   },
   role: {
@@ -34,6 +36,4 @@ const raiBoardInviteSchema = new mongoose.Schema({
   },
 });
 
-const RaiBoardInvite = mongoose.model('RaiBoardInvite', raiBoardInviteSchema);
-
-export default RaiBoardInvite;
+export const Invite = mongoose.model('Invite', inviteSchema);

@@ -6,13 +6,15 @@ import { Product } from '../models/product.model.js';
 import mongoose from 'mongoose';
 import { User } from '../models/user.model.js';
 import { Image } from '../models/images.model.js';
+import { Invite } from '../models/invite.model.js';
+import { mapRaiBoardInviteToResponse } from '../mappers/boardInvite.mapper.js';
 
 const getBoards = asyncHandler(async (req, res) => {
     const userId = req.user._id;
     const boards = await Board.find({
         $or: [
             { user_id: userId },
-            { collaborators: userId }
+            { 'collaborators.id': userId }
         ],
         isDeleted: false
     });
@@ -39,7 +41,7 @@ const getBoardById = asyncHandler(async (req, res) => {
     const board = await Board.findOne({
         _id: boardId,
         $or: [
-            { user_id: userId },
+            { 'collaborators.id': userId },
             { collaborators: userId }
         ],
         isDeleted: false
@@ -243,18 +245,101 @@ const removeProductFromBoard = asyncHandler(async (req, res) => {
 });
 
 const createBoardInvite = asyncHandler(async (req, res) => {
-    // Placeholder function for creating a board invitation
-    res.status(200).json(new ApiResponse(200, null, "createBoardInvite function called"));
+    const { boardId } = req.params; // Assuming boardId is in route params
+    const { inviteeEmail, role } = req.body;
+    const inviter = req.user._id; // Get inviter's name from authenticated user
+    if (!inviteeEmail || !role) {
+        throw new ApiError(400, "Invitee email and role are required");
+    }
+    const user = await User.findOne({ email: inviteeEmail });
+    if (!user) {
+        throw new ApiError(404, "User with provided email not found");
+    }
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + 7); // Set expiration to 7 days from now
+    const newInvite = new Invite({
+        boardId, invitedUser: user._id, role, inviter, expiresAt
+    });
+    await newInvite.save();
+    const board = await Board.findById(newInvite.boardId);
+
+    res.status(201).json(new ApiResponse(201, mapRaiBoardInviteToResponse(newInvite, board), "Board invite created successfully"));
+});
+
+const getBoardInvites = asyncHandler(async (req, res) => {
+    const userId = req.user._id;
+    const invites = await Invite.find({ invitedUser: userId }).populate("inviter");
+    const mappedInvites = await Promise.all(invites.map(async (invite) => {
+        const board = await Board.findById(invite.boardId);
+        if (!board) {
+            return null; // Or handle the case where the board is not found
+        }
+        return mapRaiBoardInviteToResponse(invite, board);
+    }));
+    res.status(200).json(new ApiResponse(200, mappedInvites.filter(invite => invite !== null), "Board invites fetched successfully"));
 });
 
 const acceptBoardInvite = asyncHandler(async (req, res) => {
-    // Placeholder function for accepting a board invitation
-    res.status(200).json(new ApiResponse(200, null, "acceptBoardInvite function called"));
+    const inviteId = req.params.inviteId;
+    const userId = req.user._id;
+    const invite = await Invite.findOne({ _id: inviteId, invitedUser: userId });
+    if (!invite) {
+        throw new ApiError(404, "Board invite not found or already accepted/declined");
+    }
+    const board = await Board.findById(invite.boardId);
+    if (!board) {
+        throw new ApiError(404, "Board not found");
+    }
+    board.collaborators.push({ id: userId, role: invite.role }); // Assuming 'editor' role for accepted invites
+    await board.save();
+    await Invite.deleteOne({ _id: inviteId });
+    res.status(200).json(new ApiResponse(200, { accepted: true }, "Board invite accepted successfully"));
 });
 
 const declineBoardInvite = asyncHandler(async (req, res) => {
-    // Placeholder function for declining a board invitation
-    res.status(200).json(new ApiResponse(200, null, "declineBoardInvite function called"));
+    const inviteId = req.params.inviteId;
+    const userId = req.user._id;
+    const invite = await Invite.findOneAndDelete({ _id: inviteId, invitedUser: userId });
+    if (!invite) {
+        throw new ApiError(404, "Board invite not found or already accepted/declined");
+    }
+    res.status(200).json(new ApiResponse(200, null, "Board invite declined successfully"));
+});
+
+
+const changeCollaboratorStatus = asyncHandler(async (req, res) => {
+    const { userId, newRole } = req.body;
+    const { boardId } = req.params;
+    const currentUserId = req.user._id;
+
+    if (!boardId || !userId || !newRole) {
+        throw new ApiError(400, "Board ID, user ID, and new role are required");
+    }
+
+    const board = await Board.findById(boardId);
+
+    if (!board) {
+        throw new ApiError(404, "Board not found");
+    }
+
+    // Check if the current user is the owner of the board
+    if (board.user_id.toString() !== currentUserId.toString()) {
+        throw new ApiError(403, "Only the board owner can change collaborator roles");
+    }
+
+    const collaboratorToUpdate = board.collaborators.find(c => c.id.toString() === userId);
+
+    if (!collaboratorToUpdate) {
+        throw new ApiError(404, "Collaborator not found in this board");
+    }
+
+    // Update the role of the collaborator
+    collaboratorToUpdate.role = newRole;
+    await board.save();
+
+    const populatedCollaborators = await populateBoardCollaborators(board.collaborators);
+
+    res.status(200).json(new ApiResponse(200, populatedCollaborators, "Collaborator role updated successfully"));
 });
 
 export {
@@ -266,8 +351,10 @@ export {
     addProductToBoard,
     removeProductFromBoard,
     createBoardInvite,
+    getBoardInvites,
     acceptBoardInvite,
-    declineBoardInvite
+    declineBoardInvite,
+    changeCollaboratorStatus,
 };
 const populateBoardProducts = async (products) => {
     return await Promise.all(products.map(async (product) => {
@@ -314,7 +401,7 @@ const convertFrontendProductsToMongo = (frontendProducts) => {
 const convertFrontendTextElementsToMongo = (frontendTextElements) => {
     return frontendTextElements.map(textElement => ({
         content: textElement.content,
-        type : textElement.type,
+        type: textElement.type,
         position: textElement.position || {
             x: 0,
             y: 0
