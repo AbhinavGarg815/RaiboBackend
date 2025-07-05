@@ -1,9 +1,11 @@
 export class ProductCardResponse {
-    constructor(_id, name, price, quantity) {
+    constructor(_id, name, externalProductId, price, quantity, similarProducts) {
         this._id = _id;
         this.name = name;
+        this.externalProductId = externalProductId;
         this.price = price;
         this.quantity = quantity;
+        this.similarProducts = similarProducts;
     }
 }
 
@@ -11,6 +13,7 @@ export class ProductDetailResponse {
     constructor({
         _id,
         name,
+        externalProductId,
         description,
         price,
         quantity,
@@ -27,10 +30,12 @@ export class ProductDetailResponse {
         likesCount,
         isLikedByUser,
         comments,
-        model3dUrl
+        model3dUrl,
+        similarProducts
     }) {
         this._id = _id;
         this.name = name;
+        this.externalProductId = externalProductId;
         this.description = description;
         this.price = price;
         this.quantity = quantity;
@@ -48,5 +53,6 @@ export class ProductDetailResponse {
         this.isLikedByUser = isLikedByUser;
         this.comments = comments;
         this.model3dUrl = model3dUrl;
+        this.similarProducts = similarProducts;
     }
 }

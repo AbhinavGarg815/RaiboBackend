@@ -7,6 +7,7 @@ class ProductMapper {
     static toProductCardResponse(product) {
         return new ProductCardResponse(
             product._id,
+            product.externalProductId,   
             product.name,
             product.price,
             product.quantity
@@ -17,6 +18,7 @@ class ProductMapper {
         return new ProductDetailResponse({
             _id: product._id,
             name: product.name,
+            externalProductId: product.externalProductId,
             price: product.price,
             quantity: product.quantity,
             description: product.description, // Add description
@@ -33,7 +35,8 @@ class ProductMapper {
             likesCount: product.likesCount, // Add likesCount
             isLikedByUser, // Add isLikedByUser
             comments,
-            model3dUrl : product.threeDModel // Add comments array
+            model3dUrl : product.threeDModel, // Add comments array
+            similarProducts: product.similarProducts // Add similarProducts array
         });
     }
 }

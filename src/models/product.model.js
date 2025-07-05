@@ -1,4 +1,5 @@
 import mongoose, { Schema } from "mongoose";
+import { generateAlphanumericId } from "../utils/idGenerator.js";
 
 const productSchema = new Schema({
     name: {
@@ -6,12 +7,12 @@ const productSchema = new Schema({
         required: true,
         trim: true,
     },
-    // companyProductId: {
-    //     type: String, // Changed type to ObjectId
-    //     required: false,
-    //     default: () => new String(mongoose.Types.ObjectId()), // Auto-generate ObjectId if not provided
-    //     unique: true
-    // },
+    externalProductId: {
+        type: String,
+        required: false,
+        unique: true,
+        default: () => generateAlphanumericId(10)
+    },
     description: {
         type: String,
         required: true,
@@ -85,6 +86,10 @@ const productSchema = new Schema({
     likedBy: [{
         type: Schema.Types.ObjectId,
         ref: 'User',
+    }],
+    similarProducts: [{
+        type: Schema.Types.ObjectId,
+        ref: 'Product',
     }],
     status: {
         type: String,

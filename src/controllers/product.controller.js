@@ -176,6 +176,96 @@ const getProductById = asyncHandler(async (req, res) => {
     });
 });
 
+const addSimilarProduct = asyncHandler(async (req, res) => {
+    const { similarProductId } = req.body;
+    const { productId } = req.params;
+
+    if (!productId || !similarProductId) {
+        throw new ApiError(400, "Product ID and Similar Product ID are required.");
+    }
+
+    if (productId === similarProductId) {
+        throw new ApiError(400, "Product ID and Similar Product ID cannot be the same.");
+    }
+
+    const [product, similarProduct] = await Promise.all([
+        Product.findById(productId),
+        Product.findById(similarProductId)
+    ]);
+
+    if (!product) {
+        throw new ApiError(404, `Product with ID ${productId} not found.`);
+    }
+
+    if (!similarProduct) {
+        throw new ApiError(404, `Similar Product with ID ${similarProductId} not found.`);
+    }
+
+    // Add similarProductId to product's similarProducts array
+    if (!product.similarProducts.includes(similarProductId)) {
+        product.similarProducts.push(similarProductId);
+        await product.save();
+    }
+
+    // Add productId to similarProduct's similarProducts array
+    if (!similarProduct.similarProducts.includes(productId)) {
+        similarProduct.similarProducts.push(productId);
+        await similarProduct.save();
+    }
+
+    res.status(200).json({
+        message: "Similar product linked successfully.",
+        product: product.similarProducts,
+        similarProduct: similarProduct.similarProducts
+    });
+});
+
+const removeSimilarProduct = asyncHandler(async (req, res) => {
+    const { similarProductId } = req.body;
+    const { productId } = req.params;
+
+    if (!productId || !similarProductId) {
+        throw new ApiError(400, "Product ID and Similar Product ID are required.");
+    }
+
+    if (productId === similarProductId) {
+        throw new ApiError(400, "Product ID and Similar Product ID cannot be the same.");
+    }
+
+    const [product, similarProduct] = await Promise.all([
+        Product.findById(productId),
+        Product.findById(similarProductId)
+    ]);
+
+    if (!product) {
+        throw new ApiError(404, `Product with ID ${productId} not found.`);
+    }
+
+    if (!similarProduct) {
+        throw new ApiError(404, `Similar Product with ID ${similarProductId} not found.`);
+    }
+
+    // Remove similarProductId from product's similarProducts array
+    const productIndex = product.similarProducts.indexOf(similarProductId);
+    if (productIndex > -1) {
+        product.similarProducts.splice(productIndex, 1);
+        await product.save();
+    }
+
+    // Remove productId from similarProduct's similarProducts array
+    const similarProductIndex = similarProduct.similarProducts.indexOf(productId);
+    if (similarProductIndex > -1) {
+        similarProduct.similarProducts.splice(similarProductIndex, 1);
+        await similarProduct.save();
+    }
+
+    res.status(200).json({
+        message: "Similar product unlinked successfully.",
+        product: product.similarProducts,
+        similarProduct: similarProduct.similarProducts
+    });
+});
+
 
 
 const updateProduct = asyncHandler(async (req, res) => {
@@ -348,5 +438,7 @@ export {
     handleLike,
     getPendingProducts,
     approveProduct,
-    rejectProduct
+    rejectProduct,
+    addSimilarProduct,
+    removeSimilarProduct
 };

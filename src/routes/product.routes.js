@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { 
  createProduct, getAllProducts, getProductById, updateProduct, deleteProduct, getProductInfoById, getAllProductsBuyer, handleLike, 
-    getPendingProducts, approveProduct, rejectProduct 
+    getPendingProducts, approveProduct, rejectProduct , addSimilarProduct, removeSimilarProduct
 } from '../controllers/product.controller.js';
 import { jwtAuthenticator } from '../middlewares/passport.middleware.js';
 import { productCreateValidator, productDeleteValidator, productGetByCategoryValidator, productGetByCompanyValidator, productGetByIdValidator, productUpdateValidator } from '../middlewares/validators/product.validator.middleware.js'; 
@@ -25,5 +25,8 @@ router.get('/', getAllProductsBuyer);
 router.get('/for-you', getAllProductsBuyer)
 //Like Route
 router.post('/like',jwtAuthenticator, handleLike);
+
+router.post('/similar/:productId', jwtAuthenticator, addSimilarProduct);
+router.delete('/similar/:productId', jwtAuthenticator, removeSimilarProduct);
 
 export default router;
